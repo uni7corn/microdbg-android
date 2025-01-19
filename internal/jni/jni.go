@@ -5,7 +5,6 @@ import (
 	"unicode/utf16"
 	"unsafe"
 
-	"github.com/modern-go/reflect2"
 	gava "github.com/wnxd/microdbg-android/java"
 	java "github.com/wnxd/microdbg-java"
 )
@@ -1536,7 +1535,7 @@ func (env *jniEnv) GetObjectRefType(obj java.JObject) java.JObjectRefType {
 }
 
 func (env *jniEnv) ObjectRef(obj java.IObject) gava.Ref {
-	if reflect2.IsNil(obj) {
+	if getPtr(obj) == nil {
 		return nilRef
 	}
 	ref := gava.Ref(obj.HashCode()<<2 | java.JInt(java.JNILocalRefType))
@@ -1592,7 +1591,7 @@ func (env *jniEnv) getField(ref java.JFieldID) java.IField {
 }
 
 func (env *jniEnv) methodRef(method java.IMethod) gava.Ref {
-	if reflect2.IsNil(method) {
+	if getPtr(method) == nil {
 		return nilRef
 	}
 	ref := gava.Ref(method.HashCode() << 1)
@@ -1601,7 +1600,7 @@ func (env *jniEnv) methodRef(method java.IMethod) gava.Ref {
 }
 
 func (env *jniEnv) fieldRef(field java.IField) gava.Ref {
-	if reflect2.IsNil(field) {
+	if getPtr(field) == nil {
 		return nilRef
 	}
 	ref := gava.Ref(field.HashCode() << 1)
@@ -1696,4 +1695,8 @@ func (env *jniEnv) extractPtr(method java.IMethod, args java.TypePtr[java.JValue
 		}
 	}
 	return arr, nil
+}
+
+func getPtr(v any) unsafe.Pointer {
+	return (*struct{ _, data unsafe.Pointer })(unsafe.Pointer(&v)).data
 }

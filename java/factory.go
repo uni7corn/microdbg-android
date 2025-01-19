@@ -6,7 +6,6 @@ import (
 	"sync"
 	"unsafe"
 
-	"github.com/modern-go/reflect2"
 	java "github.com/wnxd/microdbg-java"
 )
 
@@ -30,7 +29,7 @@ func NewClassFactory(f func(ClassFactory, string) FakeClass) ClassFactory {
 }
 
 func (cf *classFactory) WrapClass(cls java.IClass) FakeClass {
-	if reflect2.IsNil(cls) {
+	if getPtr(cls) == nil {
 		return nil
 	} else if fake, ok := cls.(FakeClass); ok {
 		return fake
@@ -196,4 +195,8 @@ func arrayOf(cf ClassFactory, elem java.IClass) *fakeArrayClass {
 		},
 		elem: elem,
 	}
+}
+
+func getPtr(v any) unsafe.Pointer {
+	return (*struct{ _, data unsafe.Pointer })(unsafe.Pointer(&v)).data
 }

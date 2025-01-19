@@ -9,7 +9,6 @@ import (
 	"github.com/wnxd/microdbg-android/internal"
 	linux "github.com/wnxd/microdbg-linux"
 	kernel "github.com/wnxd/microdbg-linux/kernel"
-	kernel_lp64 "github.com/wnxd/microdbg-linux/kernel/lp64"
 	"github.com/wnxd/microdbg-loader/elf"
 	"github.com/wnxd/microdbg/debugger"
 	"github.com/wnxd/microdbg/debugger/arm64"
@@ -19,7 +18,7 @@ import (
 
 type dbg struct {
 	arm64.Arm64Dbg[*dbg]
-	kernel.Kernel
+	*kernel.Kernel
 	linker
 	symbols
 }
@@ -35,19 +34,11 @@ func newDbg(emu emulator.Emulator) (*dbg, error) {
 			releases[i]()
 		}
 	}()
-	switch emu.Arch() {
-	case emulator.ARCH_ARM, emulator.ARCH_X86:
-		// r.Kernel = new(kernel_lp32.Kernel)
-	case emulator.ARCH_ARM64, emulator.ARCH_X86_64:
-		dbg.Kernel = new(kernel_lp64.Kernel)
-	default:
-		return nil, emulator.ErrArchUnsupported
-	}
-	err = dbg.Kernel.KernelInit(dbg)
+	dbg.Kernel, err = kernel.NewKernel(dbg)
 	if err != nil {
 		return nil, err
 	}
-	releases = append(releases, dbg.symbols.dtor)
+	releases = append(releases, dbg.Kernel.Close)
 	err = dbg.linker.ctor(dbg)
 	if err != nil {
 		return nil, err
@@ -69,7 +60,7 @@ func newDbg(emu emulator.Emulator) (*dbg, error) {
 func (dbg *dbg) Close() error {
 	dbg.symbols.dtor()
 	dbg.linker.dtor(dbg)
-	dbg.Kernel.KernelClose()
+	dbg.Kernel.Close()
 	return dbg.Arm64Dbg.Close()
 }
 
