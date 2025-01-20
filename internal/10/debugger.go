@@ -11,20 +11,20 @@ import (
 	kernel "github.com/wnxd/microdbg-linux/kernel"
 	"github.com/wnxd/microdbg-loader/elf"
 	"github.com/wnxd/microdbg/debugger"
-	"github.com/wnxd/microdbg/debugger/arm64"
+	"github.com/wnxd/microdbg/debugger/extend"
 	"github.com/wnxd/microdbg/emulator"
 	"github.com/wnxd/microdbg/filesystem"
 )
 
 type dbg struct {
-	arm64.Arm64Dbg[*dbg]
+	extend.ExtendDebugger
 	*kernel.Kernel
 	linker
 	symbols
 }
 
 func newDbg(emu emulator.Emulator) (*dbg, error) {
-	dbg, err := arm64.NewExtendDebugger[*dbg](emu)
+	dbg, err := extend.New[*dbg](emu)
 	if err != nil {
 		return nil, err
 	}
@@ -61,11 +61,11 @@ func (dbg *dbg) Close() error {
 	dbg.symbols.dtor()
 	dbg.linker.dtor(dbg)
 	dbg.Kernel.Close()
-	return dbg.Arm64Dbg.Close()
+	return dbg.ExtendDebugger.Close()
 }
 
 func (dbg *dbg) FindModule(name string) (debugger.Module, error) {
-	module, err := dbg.Arm64Dbg.FindModule(name)
+	module, err := dbg.ExtendDebugger.FindModule(name)
 	if err == nil {
 		return module, nil
 	}
@@ -92,7 +92,7 @@ func (dbg *dbg) FindSymbol(name string) (debugger.Module, uint64, error) {
 	if err == nil {
 		return debugger.InternalModule, addr, nil
 	}
-	return dbg.Arm64Dbg.FindSymbol(name)
+	return dbg.ExtendDebugger.FindSymbol(name)
 }
 
 func (dbg *dbg) NR(no uint64) linux.NR {
