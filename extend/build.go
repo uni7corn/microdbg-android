@@ -21,7 +21,7 @@ func (ex *extend) defineBuild() {
 		emu := ex.art.Emulator()
 		getprop = func(name string) string {
 			var len int32
-			err := propGet.Call(context.TODO(), debugger.Calling_Default, &len, name, addr)
+			err := propGet.Call(context.TODO(), debugger.Calling_Default, &len, name, uintptr(addr))
 			if err != nil {
 				return ""
 			}

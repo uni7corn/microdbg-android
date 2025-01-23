@@ -1,15 +1,23 @@
 package android
 
-import "github.com/wnxd/microdbg/emulator"
+import (
+	"unsafe"
 
-type fdTable[P any] struct {
+	"github.com/wnxd/microdbg/emulator"
+)
+
+type Pointer interface {
+	~uint32 | ~uint64
+}
+
+type fdTable[P Pointer] struct {
 	version     uint32
 	error_level int32
 	entries     [128]uint64
 	overflow    P
 }
 
-type staticTlsLayout[P any] struct {
+type staticTlsLayout[P Pointer] struct {
 	offset_            P
 	alignment_         P
 	overflowed_        bool
@@ -17,7 +25,7 @@ type staticTlsLayout[P any] struct {
 	offset_bionic_tls_ P
 }
 
-type bionicSmallObjectAllocator[P any] struct {
+type bionicSmallObjectAllocator[P Pointer] struct {
 	type_            uint32
 	block_size_      P
 	blocks_per_page_ P
@@ -25,12 +33,12 @@ type bionicSmallObjectAllocator[P any] struct {
 	page_list_       P
 }
 
-type bionicAllocator[P any] struct {
+type bionicAllocator[P Pointer] struct {
 	allocators_     P
 	allocators_buf_ [7]bionicSmallObjectAllocator[P]
 }
 
-type mntent[P any] struct {
+type mntent[P Pointer] struct {
 	mnt_fsname P
 	mnt_dir    P
 	mnt_type   P
@@ -39,14 +47,14 @@ type mntent[P any] struct {
 	mnt_passno int32
 }
 
-type group[P any] struct {
+type group[P Pointer] struct {
 	gr_name   P
 	gr_passwd P
 	gr_gid    uint32
 	gr_mem    P
 }
 
-type group_state[P any] struct {
+type group_state[P Pointer] struct {
 	group_             group[P]
 	group_members_     [2]P
 	group_name_buffer_ [32]byte
@@ -132,4 +140,25 @@ type bionicTls64 struct {
 	strsignal_buf  [255]byte
 	group          group_state[emulator.Uintptr64]
 	passwd         passwd_state64
+}
+
+func (layout *staticTlsLayout[P]) reserve_bionic_tls() {
+	if unsafe.Sizeof(P(0)) == 4 {
+		layout.offset_bionic_tls_ = layout.reserve(P(unsafe.Sizeof(bionicTls32{})), P(unsafe.Alignof(bionicTls32{})))
+	} else {
+		layout.offset_bionic_tls_ = layout.reserve(P(unsafe.Sizeof(bionicTls64{})), P(unsafe.Alignof(bionicTls64{})))
+	}
+}
+
+func (layout *staticTlsLayout[P]) reserve(size, alignment P) P {
+	offset := align(layout.offset_, alignment)
+	if offset < layout.offset_ {
+		layout.overflowed_ = true
+	}
+	layout.offset_ = offset + size
+	if layout.offset_ < offset {
+		layout.overflowed_ = true
+	}
+	layout.alignment_ = max(layout.alignment_, alignment)
+	return offset
 }

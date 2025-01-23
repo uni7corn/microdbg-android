@@ -78,5 +78,5 @@ func (dbg *dbg) loader_dlsym(ctx debugger.Context) any {
 	if err != nil {
 		return uintptr(0)
 	}
-	return handle + uintptr(addr)
+	return uintptr(addr)
 }

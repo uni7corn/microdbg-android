@@ -45,7 +45,7 @@ func (h *HybridFS) OpenFile(name string, flag filesystem.FileFlag, perm fs.FileM
 	if h.Base != nil && flag == filesystem.O_RDONLY {
 		file, err := h.Base.Open(name)
 		if err == nil {
-			return file, nil
+			return virtual.SeekerOf(file), nil
 		}
 	}
 	if h.Sys != nil {

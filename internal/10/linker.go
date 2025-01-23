@@ -1,6 +1,7 @@
 package android
 
 import (
+	"context"
 	"unsafe"
 
 	"github.com/wnxd/microdbg-android/internal"
@@ -9,6 +10,7 @@ import (
 	emu_arm "github.com/wnxd/microdbg/emulator/arm"
 	emu_arm64 "github.com/wnxd/microdbg/emulator/arm64"
 	emu_x86 "github.com/wnxd/microdbg/emulator/x86"
+	"golang.org/x/exp/constraints"
 )
 
 var environ = []string{
@@ -108,7 +110,11 @@ func (l *linker) initTLS(art internal.Runtime) error {
 	default:
 		return emulator.ErrArchUnsupported
 	}
-	var err error
+	task, err := dbg.CreateTask(context.TODO())
+	if err != nil {
+		return err
+	}
+	defer task.Close()
 	var thread, stackGuard, pointerSize uint64
 	switch arch {
 	case emulator.ARCH_ARM, emulator.ARCH_X86:
@@ -117,7 +123,7 @@ func (l *linker) initTLS(art internal.Runtime) error {
 			return err
 		}
 		l.addr = align(l.addr, 8)
-		t := pthread[emulator.Uintptr32]{tid: 1}
+		t := pthread[emulator.Uintptr32]{tid: uint32(task.ID())}
 		thread, err = l.pushData(emu, unsafe.Pointer(&t), uint64(unsafe.Sizeof(t)))
 		if err != nil {
 			return err
@@ -130,7 +136,7 @@ func (l *linker) initTLS(art internal.Runtime) error {
 			return err
 		}
 		l.addr = align(l.addr, 16)
-		t := pthread[emulator.Uintptr64]{tid: 1}
+		t := pthread[emulator.Uintptr64]{tid: uint32(task.ID())}
 		thread, err = l.pushData(emu, unsafe.Pointer(&t), uint64(unsafe.Sizeof(t)))
 		if err != nil {
 			return err
@@ -158,13 +164,13 @@ func (l *linker) initTLS(art internal.Runtime) error {
 	}
 	switch arch {
 	case emulator.ARCH_ARM:
-		emu.RegWrite(emu_arm.ARM_REG_C13_C0_3, tls)
+		task.Context().RegWrite(emu_arm.ARM_REG_C13_C0_3, tls)
 	case emulator.ARCH_ARM64:
-		emu.RegWrite(emu_arm64.ARM64_REG_TPIDR_EL0, tls)
+		task.Context().RegWrite(emu_arm64.ARM64_REG_TPIDR_EL0, tls)
 	case emulator.ARCH_X86:
-		emu.RegWrite(emu_x86.X86_REG_GS, tls)
+		task.Context().RegWrite(emu_x86.X86_REG_GS, tls)
 	case emulator.ARCH_X86_64:
-		emu.RegWrite(emu_x86.X86_REG_FS, tls)
+		task.Context().RegWrite(emu_x86.X86_REG_FS, tls)
 	}
 	return nil
 }
@@ -193,6 +199,7 @@ func (l *linker) initSharedGlobals(art internal.Runtime) error {
 			var null uint32
 			l.pushData(emu, unsafe.Pointer(&null), 4)
 		}
+		globals.static_tls_layout.reserve_bionic_tls()
 		l.addr = align(l.addr, 8)
 		l.globals, _ = l.pushData(emu, unsafe.Pointer(&globals), uint64(unsafe.Sizeof(globals)))
 	case emulator.ARCH_ARM64, emulator.ARCH_X86_64:
@@ -216,6 +223,7 @@ func (l *linker) initSharedGlobals(art internal.Runtime) error {
 			var null uint64
 			l.pushData(emu, unsafe.Pointer(&null), 8)
 		}
+		globals.static_tls_layout.reserve_bionic_tls()
 		l.addr = align(l.addr, 16)
 		l.globals, _ = l.pushData(emu, unsafe.Pointer(&globals), uint64(unsafe.Sizeof(globals)))
 	}
@@ -226,7 +234,7 @@ func unsigned(v int64) uint64 {
 	return uint64(v)
 }
 
-func align(a, b uint64) uint64 {
+func align[I constraints.Integer](a, b I) I {
 	a += b - 1
 	mask := -b
 	a &= mask

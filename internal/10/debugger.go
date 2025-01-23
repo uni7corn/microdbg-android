@@ -7,6 +7,10 @@ import (
 	"unsafe"
 
 	"github.com/wnxd/microdbg-android/internal"
+	"github.com/wnxd/microdbg-android/internal/arm"
+	"github.com/wnxd/microdbg-android/internal/arm64"
+	"github.com/wnxd/microdbg-android/internal/x86"
+	"github.com/wnxd/microdbg-android/internal/x86_64"
 	linux "github.com/wnxd/microdbg-linux"
 	kernel "github.com/wnxd/microdbg-linux/kernel"
 	"github.com/wnxd/microdbg-loader/elf"
@@ -21,6 +25,7 @@ type dbg struct {
 	*kernel.Kernel
 	linker
 	symbols
+	nrMap map[uint64]linux.NR
 }
 
 func newDbg(emu emulator.Emulator) (*dbg, error) {
@@ -54,6 +59,16 @@ func newDbg(emu emulator.Emulator) (*dbg, error) {
 		return nil, err
 	}
 	releases = nil
+	switch emu.Arch() {
+	case emulator.ARCH_ARM:
+		dbg.nrMap = arm.NRMap
+	case emulator.ARCH_ARM64:
+		dbg.nrMap = arm64.NRMap
+	case emulator.ARCH_X86:
+		dbg.nrMap = x86.NRMap
+	case emulator.ARCH_X86_64:
+		dbg.nrMap = x86_64.NRMap
+	}
 	return dbg, nil
 }
 
@@ -96,7 +111,7 @@ func (dbg *dbg) FindSymbol(name string) (debugger.Module, uint64, error) {
 }
 
 func (dbg *dbg) NR(no uint64) linux.NR {
-	return internal.NRMap[no]
+	return dbg.nrMap[no]
 }
 
 func (dbg *dbg) Errno() linux.Errno {

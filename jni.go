@@ -18,8 +18,6 @@ type JNIEnv interface {
 	DefineClass(JNIContext, string, java.IObject, []java.JByte) (java.IClass, error)
 	FindClass(JNIContext, string) (java.IClass, error)
 	ThrowNew(JNIContext, java.IClass, string) (java.JInt, error)
-	AllocObject(JNIContext, java.IClass) (java.IObject, error)
-	NewObject(JNIContext, java.IClass, java.IMethod, ...any) (java.IObject, error)
 	GetMethod(JNIContext, java.IClass, string, string) (java.IMethod, error)
 	GetField(JNIContext, java.IClass, string, string) (java.IField, error)
 	GetStaticMethod(JNIContext, java.IClass, string, string) (java.IMethod, error)

@@ -211,24 +211,24 @@ func (cls *fakeClass) NewThrowable(msg string) java.IThrowable {
 }
 
 func (cls *fakeClass) NewArray(length int) java.IArray {
-	switch cls {
-	case FakeBooleanTYPE:
-		return make(FakeJArray, length)
-	case FakeByteTYPE:
+	switch cls.name {
+	case "boolean":
+		return make(FakeZArray, length)
+	case "byte":
 		return make(FakeBArray, length)
-	case FakeCharTYPE:
+	case "char":
 		return make(FakeCArray, length)
-	case FakeShortTYPE:
+	case "short":
 		return make(FakeSArray, length)
-	case FakeIntTYPE:
+	case "int":
 		return make(FakeIArray, length)
-	case FakeLongTYPE:
+	case "long":
 		return make(FakeJArray, length)
-	case FakeFloatTYPE:
+	case "float":
 		return make(FakeFArray, length)
-	case FakeDoubleTYPE:
+	case "double":
 		return make(FakeDArray, length)
-	case FakeVoidTYPE:
+	case "void":
 		return nil
 	default:
 		return fakeObjectArray{fakeArray: make(fakeArray[java.IObject], length), cls: arrayOf(cls.cf, cls)}

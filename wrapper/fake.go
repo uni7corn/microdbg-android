@@ -20,7 +20,6 @@ type FakeDefineHandler interface {
 }
 
 type FakeClassHandler interface {
-	NewObject(android.JNIContext, gava.FakeClass, string, ...any) java.IObject
 	CallMethod(android.JNIContext, gava.FakeObject, string, string, ...any) any
 	CallStaticMethod(android.JNIContext, gava.FakeClass, string, string, ...any) any
 	GetField(android.JNIContext, gava.FakeObject, string) any
@@ -76,18 +75,6 @@ func (w *fakeWrapper) ThrowNew(ctx android.JNIContext, clazz java.IClass, messag
 	ex := fake.NewThrowable(message)
 	ctx.Throw(ex)
 	return java.JNI_OK, nil
-}
-
-func (w *fakeWrapper) AllocObject(ctx android.JNIContext, clazz java.IClass) (java.IObject, error) {
-	return clazz.NewInstance(), nil
-}
-
-func (w *fakeWrapper) NewObject(ctx android.JNIContext, clazz java.IClass, method java.IMethod, args ...any) (java.IObject, error) {
-	fake := clazz.(gava.FakeClass)
-	if h, ok := w.getHandler(fake); ok {
-		return h.NewObject(fakeJNIContext{ctx, w.cf}, fake, gava.GetMethodDescriptor(method), args...), nil
-	}
-	panic(fmt.Errorf("[FakeWrapper.NewObject] %w: %s", debugger.ErrNotImplemented, clazz.GetName()))
 }
 
 func (w *fakeWrapper) GetMethod(ctx android.JNIContext, clazz java.IClass, name, sig string) (java.IMethod, error) {
@@ -173,7 +160,7 @@ func (w *fakeWrapper) NewStringUTF(ctx android.JNIContext, bytes string) (java.I
 }
 
 func (w *fakeWrapper) NewObjectArray(ctx android.JNIContext, length java.JSize, elementClass java.IClass, initialElement java.IObject) (java.IGenericArray[java.IObject], error) {
-	arr := w.cf.ArrayOf(elementClass).NewArray(int(length)).(java.IGenericArray[java.IObject])
+	arr := elementClass.(gava.FakeClass).NewArray(int(length)).(java.IGenericArray[java.IObject])
 	if initialElement != nil {
 		raw := arr.Elements()
 		for i := range raw {
@@ -184,35 +171,35 @@ func (w *fakeWrapper) NewObjectArray(ctx android.JNIContext, length java.JSize, 
 }
 
 func (w *fakeWrapper) NewBooleanArray(ctx android.JNIContext, length java.JSize) (java.IGenericArray[java.JBoolean], error) {
-	return w.cf.ArrayOf(gava.FakeBooleanTYPE).NewArray(int(length)).(java.IGenericArray[java.JBoolean]), nil
+	return gava.FakeBooleanTYPE.NewArray(int(length)).(java.IGenericArray[java.JBoolean]), nil
 }
 
 func (w *fakeWrapper) NewByteArray(ctx android.JNIContext, length java.JSize) (java.IGenericArray[java.JByte], error) {
-	return w.cf.ArrayOf(gava.FakeByteTYPE).NewArray(int(length)).(java.IGenericArray[java.JByte]), nil
+	return gava.FakeByteTYPE.NewArray(int(length)).(java.IGenericArray[java.JByte]), nil
 }
 
 func (w *fakeWrapper) NewCharArray(ctx android.JNIContext, length java.JSize) (java.IGenericArray[java.JChar], error) {
-	return w.cf.ArrayOf(gava.FakeCharTYPE).NewArray(int(length)).(java.IGenericArray[java.JChar]), nil
+	return gava.FakeCharTYPE.NewArray(int(length)).(java.IGenericArray[java.JChar]), nil
 }
 
 func (w *fakeWrapper) NewShortArray(ctx android.JNIContext, length java.JSize) (java.IGenericArray[java.JShort], error) {
-	return w.cf.ArrayOf(gava.FakeShortTYPE).NewArray(int(length)).(java.IGenericArray[java.JShort]), nil
+	return gava.FakeShortTYPE.NewArray(int(length)).(java.IGenericArray[java.JShort]), nil
 }
 
 func (w *fakeWrapper) NewIntArray(ctx android.JNIContext, length java.JSize) (java.IGenericArray[java.JInt], error) {
-	return w.cf.ArrayOf(gava.FakeIntTYPE).NewArray(int(length)).(java.IGenericArray[java.JInt]), nil
+	return gava.FakeIntTYPE.NewArray(int(length)).(java.IGenericArray[java.JInt]), nil
 }
 
 func (w *fakeWrapper) NewLongArray(ctx android.JNIContext, length java.JSize) (java.IGenericArray[java.JLong], error) {
-	return w.cf.ArrayOf(gava.FakeLongTYPE).NewArray(int(length)).(java.IGenericArray[java.JLong]), nil
+	return gava.FakeLongTYPE.NewArray(int(length)).(java.IGenericArray[java.JLong]), nil
 }
 
 func (w *fakeWrapper) NewFloatArray(ctx android.JNIContext, length java.JSize) (java.IGenericArray[java.JFloat], error) {
-	return w.cf.ArrayOf(gava.FakeFloatTYPE).NewArray(int(length)).(java.IGenericArray[java.JFloat]), nil
+	return gava.FakeFloatTYPE.NewArray(int(length)).(java.IGenericArray[java.JFloat]), nil
 }
 
 func (w *fakeWrapper) NewDoubleArray(ctx android.JNIContext, length java.JSize) (java.IGenericArray[java.JDouble], error) {
-	return w.cf.ArrayOf(gava.FakeDoubleTYPE).NewArray(int(length)).(java.IGenericArray[java.JDouble]), nil
+	return gava.FakeDoubleTYPE.NewArray(int(length)).(java.IGenericArray[java.JDouble]), nil
 }
 
 func (w *fakeWrapper) ClassFactory() gava.ClassFactory {

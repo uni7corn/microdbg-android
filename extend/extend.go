@@ -32,7 +32,8 @@ func Define(art android.Runtime, cf gava.ClassFactory) Extend {
 	ex.defineLocale()
 	ex.defineFile()
 	ex.defineBuild()
-	ex.defineContext()
+	ex.defineContent()
+	ex.defineApp()
 	return ex
 }
 

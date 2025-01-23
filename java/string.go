@@ -10,11 +10,11 @@ import (
 type FakeString string
 
 func (str FakeString) GetClass() java.IClass {
-	return nil
+	return FakeStringClass
 }
 
 func (str FakeString) HashCode() java.JInt {
-	ptr := (*struct{ rtype, data unsafe.Pointer })(unsafe.Pointer((&str))).data
+	ptr := (*struct{ data unsafe.Pointer })(unsafe.Pointer((&str))).data
 	return int32(uintptr(ptr))
 }
 

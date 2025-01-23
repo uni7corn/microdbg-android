@@ -1,7 +1,6 @@
 package internal
 
 import (
-	"context"
 	"hash/fnv"
 	"sync"
 	"unsafe"
@@ -100,17 +99,11 @@ func (env *Environ) FatalError(string) {
 }
 
 func (env *Environ) AllocObject(clazz java.IClass) java.IObject {
-	if env.JNI == nil {
-		return nil
-	}
-	return must(env.JNI.AllocObject(env, clazz))
+	return clazz.NewInstance()
 }
 
 func (env *Environ) NewObject(clazz java.IClass, method java.IMethod, args ...any) java.IObject {
-	if env.JNI == nil {
-		return nil
-	}
-	return must(env.JNI.NewObject(env, clazz, method, args...))
+	return method.Call(clazz, args...)
 }
 
 func (env *Environ) GetMethod(clazz java.IClass, name string, sig string) java.IMethod {
@@ -573,49 +566,8 @@ func (env *Environ) RegisterNatives(clazz java.IClass, methods []java.JNINativeM
 	fake := clazz.(gava.FakeClass)
 	for i := range methods {
 		method := &methods[i]
-		sym := NewSymbol(env.dbg, method.Name, uint64(method.FnPtr))
 		fakeMethod := fake.DefineMethod(method.Name, method.Signature, gava.Modifier_NATIVE)
-		cls := fakeMethod.GetReturnType()
-		fakeMethod.BindCall(func(obj java.IObject, args ...any) any {
-			fake, err := env.vm.AttachJNIEnv(env.dbg)
-			if err != nil {
-				panic(err)
-			}
-			defer env.vm.DetachJNIEnv(fake)
-			jniEnv := env.vm.GetJNIEnv(fake).(jni.JNIEnv)
-			for i := range args {
-				if obj, ok := args[i].(java.IObject); ok {
-					args[i] = jniEnv.ObjectRef(obj)
-				}
-			}
-			var r gava.JValue
-			err = sym.Call(context.TODO(), debugger.Calling_Default, &r, append([]any{fake, jniEnv.ObjectRef(obj)}, args...)...)
-			if err != nil {
-				panic(err)
-			}
-			switch cls {
-			case gava.FakeBooleanTYPE:
-				return r.JBoolean()
-			case gava.FakeByteTYPE:
-				return r.JByte()
-			case gava.FakeCharTYPE:
-				return r.JChar()
-			case gava.FakeShortTYPE:
-				return r.JShort()
-			case gava.FakeIntTYPE:
-				return r.JInt()
-			case gava.FakeLongTYPE:
-				return r.JLong()
-			case gava.FakeFloatTYPE:
-				return r.JFloat()
-			case gava.FakeDoubleTYPE:
-				return r.JDouble()
-			case gava.FakeVoidTYPE:
-				return nil
-			default:
-				return jniEnv.GetObject(r.JObject())
-			}
-		})
+		fakeMethod.BindCall(newNativeMethod(env.dbg, env.vm, uint64(method.FnPtr), fakeMethod.GetReturnType().DescriptorString().String()))
 	}
 	return java.JNI_OK
 }

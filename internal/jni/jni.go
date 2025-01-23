@@ -1538,7 +1538,7 @@ func (env *jniEnv) ObjectRef(obj java.IObject) gava.Ref {
 	if getPtr(obj) == nil {
 		return nilRef
 	}
-	ref := gava.Ref(obj.HashCode()<<2 | java.JInt(java.JNILocalRefType))
+	ref := gava.Ref(obj.HashCode()<<2|java.JInt(java.JNILocalRefType)) & 0xFFFFFFFF
 	env.localRef.Store(ref, obj)
 	return ref
 }
@@ -1594,7 +1594,7 @@ func (env *jniEnv) methodRef(method java.IMethod) gava.Ref {
 	if getPtr(method) == nil {
 		return nilRef
 	}
-	ref := gava.Ref(method.HashCode() << 1)
+	ref := gava.Ref(method.HashCode()<<1) & 0xFFFFFFFF
 	env.methods.Store(ref, method)
 	return ref
 }
@@ -1603,7 +1603,7 @@ func (env *jniEnv) fieldRef(field java.IField) gava.Ref {
 	if getPtr(field) == nil {
 		return nilRef
 	}
-	ref := gava.Ref(field.HashCode() << 1)
+	ref := gava.Ref(field.HashCode()<<1) & 0xFFFFFFFF
 	env.fields.Store(ref, field)
 	return ref
 }

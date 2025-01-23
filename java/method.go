@@ -9,6 +9,8 @@ import (
 	"github.com/wnxd/microdbg/debugger"
 )
 
+const ConstructorMethodName = "<init>"
+
 type FakeMethod interface {
 	java.IMethod
 	GetReturnType() java.IClass
@@ -113,7 +115,7 @@ func (method *fakeMethod) Descriptor() string {
 }
 
 func (method *fakeMethod) IsConstructor() bool {
-	return method.name == "<init>"
+	return method.name == ConstructorMethodName
 }
 
 func (method *fakeMethod) BindCall(f func(java.IObject, ...any) any) FakeMethod {
