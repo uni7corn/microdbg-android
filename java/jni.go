@@ -471,10 +471,9 @@ func (vm *vm) AttachCurrentThreadAsDaemon_(ctx debugger.Context, _ any) {
 }
 
 func (env *env) Close() error {
-	env.maps.Range(func(key, value any) bool {
+	for _, value := range env.maps.Range {
 		value.(io.Closer).Close()
-		return true
-	})
+	}
 	env.maps.Clear()
 	for i := len(env.releases) - 1; i >= 0; i-- {
 		env.releases[i]()
@@ -488,13 +487,12 @@ func (env *env) getFake(dbg debugger.Debugger, handler java.JNIEnv) (FakeJNIEnv,
 		return 0, debugger.ErrArgumentInvalid
 	}
 	var fake FakeJNIEnv
-	env.maps.Range(func(key, value any) bool {
+	for key, value := range env.maps.Range {
 		if value.(*jniEnv).JNIEnv == handler {
 			fake = key.(FakeJNIEnv)
-			return false
+			break
 		}
-		return true
-	})
+	}
 	if fake != 0 {
 		return fake, nil
 	}
