@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"io/fs"
+	"sync"
 	"unsafe"
 
 	"github.com/wnxd/microdbg-android/internal"
@@ -25,7 +26,8 @@ type dbg struct {
 	*kernel.Kernel
 	linker
 	symbols
-	nrMap map[uint64]linux.NR
+	nrMap      map[uint64]linux.NR
+	errModuels sync.Map
 }
 
 func newDbg(emu emulator.Emulator) (*dbg, error) {
@@ -84,6 +86,9 @@ func (dbg *dbg) FindModule(name string) (debugger.Module, error) {
 	if err == nil {
 		return module, nil
 	}
+	if err, ok := dbg.errModuels.Load(name); ok {
+		return nil, err.(error)
+	}
 	var file filesystem.File
 	switch dbg.Arch() {
 	case emulator.ARCH_ARM, emulator.ARCH_X86:
@@ -92,12 +97,15 @@ func (dbg *dbg) FindModule(name string) (debugger.Module, error) {
 		file, err = dbg.OpenFile("/system/lib64/"+name, filesystem.O_RDONLY, 0)
 	}
 	if err != nil {
+		dbg.errModuels.Store(name, debugger.ErrModuleNotFound)
 		return nil, debugger.ErrModuleNotFound
 	}
 	module, err = dbg.loadModule(context.TODO(), file.(fs.File))
 	file.Close()
 	if err != nil {
-		return nil, errors.Join(debugger.ErrModuleNotFound, err)
+		err = errors.Join(debugger.ErrModuleNotFound, err)
+		dbg.errModuels.Store(name, err)
+		return nil, err
 	}
 	return module, nil
 }
