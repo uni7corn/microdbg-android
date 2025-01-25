@@ -303,7 +303,7 @@ type jniEnv struct {
 	java.JNIEnv
 	release func() error
 	dbg     debugger.Debugger
-	mems    sync.Map
+	mems    map[uint64]any
 }
 
 var (
@@ -509,7 +509,8 @@ func (env *env) getFake(dbg debugger.Debugger, handler java.JNIEnv) (FakeJNIEnv,
 			}
 			return nil
 		},
-		dbg: dbg,
+		dbg:  dbg,
+		mems: make(map[uint64]any),
 	})
 	return fake, nil
 }
@@ -2557,7 +2558,7 @@ func (env *env) GetStringChars_(ctx debugger.Context, _ any) {
 		if err == nil {
 			ctx.ToPointer(addr).MemWritePtr(size, unsafe.Pointer(unsafe.SliceData(chars)))
 			ctx.ToPointer(addr+size).MemWritePtr(2, unsafe.Pointer(&null))
-			handler.mems.Store(addr, chars)
+			handler.mems[addr] = chars
 		}
 		ctx.RetWrite(uintptr(addr))
 	} else {
@@ -2573,7 +2574,8 @@ func (env *env) ReleaseStringChars_(ctx debugger.Context, _ any) {
 	ctx.ArgExtract(debugger.Calling_Default, &fake, &str, &chars)
 	addr := uint64(chars)
 	if handler, ok := env.getEnv(fake); ok {
-		if val, ok := handler.mems.LoadAndDelete(addr); ok {
+		if val, ok := handler.mems[addr]; ok {
+			delete(handler.mems, addr)
 			handler.ReleaseStringChars(str, val.([]java.JChar))
 			ctx.Debugger().MemFree(addr)
 		}
@@ -2616,7 +2618,7 @@ func (env *env) GetStringUTFChars_(ctx debugger.Context, _ any) {
 		if err == nil {
 			ctx.ToPointer(addr).MemWrite(bytes)
 			ctx.ToPointer(addr+size).MemWritePtr(1, unsafe.Pointer(&null))
-			handler.mems.Store(addr, bytes)
+			handler.mems[addr] = bytes
 		}
 		ctx.RetWrite(uintptr(addr))
 	} else {
@@ -2632,7 +2634,8 @@ func (env *env) ReleaseStringUTFChars_(ctx debugger.Context, _ any) {
 	ctx.ArgExtract(debugger.Calling_Default, &fake, &str, &bytes)
 	addr := uint64(bytes)
 	if handler, ok := env.getEnv(fake); ok {
-		if val, ok := handler.mems.LoadAndDelete(addr); ok {
+		if val, ok := handler.mems[addr]; ok {
+			delete(handler.mems, addr)
 			handler.ReleaseStringUTFChars(str, val.([]byte))
 			ctx.Debugger().MemFree(addr)
 		}
@@ -2796,7 +2799,7 @@ func (env *env) GetBooleanArrayElements_(ctx debugger.Context, _ any) {
 		addr, err := ctx.Debugger().MemAlloc(size)
 		if err == nil {
 			ctx.ToPointer(addr).MemWritePtr(size, unsafe.Pointer(unsafe.SliceData(elems)))
-			handler.mems.Store(addr, elems)
+			handler.mems[addr] = elems
 		}
 		ctx.RetWrite(uintptr(addr))
 	} else {
@@ -2815,7 +2818,7 @@ func (env *env) GetByteArrayElements_(ctx debugger.Context, _ any) {
 		addr, err := ctx.Debugger().MemAlloc(size)
 		if err == nil {
 			ctx.ToPointer(addr).MemWritePtr(size, unsafe.Pointer(unsafe.SliceData(elems)))
-			handler.mems.Store(addr, elems)
+			handler.mems[addr] = elems
 		}
 		ctx.RetWrite(uintptr(addr))
 	} else {
@@ -2834,7 +2837,7 @@ func (env *env) GetCharArrayElements_(ctx debugger.Context, _ any) {
 		addr, err := ctx.Debugger().MemAlloc(size)
 		if err == nil {
 			ctx.ToPointer(addr).MemWritePtr(size, unsafe.Pointer(unsafe.SliceData(elems)))
-			handler.mems.Store(addr, elems)
+			handler.mems[addr] = elems
 		}
 		ctx.RetWrite(uintptr(addr))
 	} else {
@@ -2853,7 +2856,7 @@ func (env *env) GetShortArrayElements_(ctx debugger.Context, _ any) {
 		addr, err := ctx.Debugger().MemAlloc(size)
 		if err == nil {
 			ctx.ToPointer(addr).MemWritePtr(size, unsafe.Pointer(unsafe.SliceData(elems)))
-			handler.mems.Store(addr, elems)
+			handler.mems[addr] = elems
 		}
 		ctx.RetWrite(uintptr(addr))
 	} else {
@@ -2872,7 +2875,7 @@ func (env *env) GetIntArrayElements_(ctx debugger.Context, _ any) {
 		addr, err := ctx.Debugger().MemAlloc(size)
 		if err == nil {
 			ctx.ToPointer(addr).MemWritePtr(size, unsafe.Pointer(unsafe.SliceData(elems)))
-			handler.mems.Store(addr, elems)
+			handler.mems[addr] = elems
 		}
 		ctx.RetWrite(uintptr(addr))
 	} else {
@@ -2891,7 +2894,7 @@ func (env *env) GetLongArrayElements_(ctx debugger.Context, _ any) {
 		addr, err := ctx.Debugger().MemAlloc(size)
 		if err == nil {
 			ctx.ToPointer(addr).MemWritePtr(size, unsafe.Pointer(unsafe.SliceData(elems)))
-			handler.mems.Store(addr, elems)
+			handler.mems[addr] = elems
 		}
 		ctx.RetWrite(uintptr(addr))
 	} else {
@@ -2910,7 +2913,7 @@ func (env *env) GetFloatArrayElements_(ctx debugger.Context, _ any) {
 		addr, err := ctx.Debugger().MemAlloc(size)
 		if err == nil {
 			ctx.ToPointer(addr).MemWritePtr(size, unsafe.Pointer(unsafe.SliceData(elems)))
-			handler.mems.Store(addr, elems)
+			handler.mems[addr] = elems
 		}
 		ctx.RetWrite(uintptr(addr))
 	} else {
@@ -2929,7 +2932,7 @@ func (env *env) GetDoubleArrayElements_(ctx debugger.Context, _ any) {
 		addr, err := ctx.Debugger().MemAlloc(size)
 		if err == nil {
 			ctx.ToPointer(addr).MemWritePtr(size, unsafe.Pointer(unsafe.SliceData(elems)))
-			handler.mems.Store(addr, elems)
+			handler.mems[addr] = elems
 		}
 		ctx.RetWrite(uintptr(addr))
 	} else {
@@ -2946,14 +2949,14 @@ func (env *env) ReleaseBooleanArrayElements_(ctx debugger.Context, _ any) {
 	ctx.ArgExtract(debugger.Calling_Default, &fake, &array, &elems, &mode)
 	addr := uint64(elems)
 	if handler, ok := env.getEnv(fake); ok {
-		if val, ok := handler.mems.Load(addr); ok {
+		if val, ok := handler.mems[addr]; ok {
 			elems := val.([]java.JBoolean)
 			if mode == 0 || mode == java.JNI_COMMIT {
 				ctx.ToPointer(addr).MemReadPtr(uint64(len(elems)), unsafe.Pointer(unsafe.SliceData(elems)))
 			}
 			handler.ReleaseBooleanArrayElements(array, elems, mode)
 			if mode == 0 || mode == java.JNI_ABORT {
-				handler.mems.Delete(addr)
+				delete(handler.mems, addr)
 				ctx.Debugger().MemFree(addr)
 			}
 		}
@@ -2969,14 +2972,14 @@ func (env *env) ReleaseByteArrayElements_(ctx debugger.Context, _ any) {
 	ctx.ArgExtract(debugger.Calling_Default, &fake, &array, &elems, &mode)
 	addr := uint64(elems)
 	if handler, ok := env.getEnv(fake); ok {
-		if val, ok := handler.mems.Load(addr); ok {
+		if val, ok := handler.mems[addr]; ok {
 			elems := val.([]java.JByte)
 			if mode == 0 || mode == java.JNI_COMMIT {
 				ctx.ToPointer(addr).MemReadPtr(uint64(len(elems)), unsafe.Pointer(unsafe.SliceData(elems)))
 			}
 			handler.ReleaseByteArrayElements(array, elems, mode)
 			if mode == 0 || mode == java.JNI_ABORT {
-				handler.mems.Delete(addr)
+				delete(handler.mems, addr)
 				ctx.Debugger().MemFree(addr)
 			}
 		}
@@ -2992,14 +2995,14 @@ func (env *env) ReleaseCharArrayElements_(ctx debugger.Context, _ any) {
 	ctx.ArgExtract(debugger.Calling_Default, &fake, &array, &elems, &mode)
 	addr := uint64(elems)
 	if handler, ok := env.getEnv(fake); ok {
-		if val, ok := handler.mems.Load(addr); ok {
+		if val, ok := handler.mems[addr]; ok {
 			elems := val.([]java.JChar)
 			if mode == 0 || mode == java.JNI_COMMIT {
 				ctx.ToPointer(addr).MemReadPtr(uint64(len(elems)*2), unsafe.Pointer(unsafe.SliceData(elems)))
 			}
 			handler.ReleaseCharArrayElements(array, elems, mode)
 			if mode == 0 || mode == java.JNI_ABORT {
-				handler.mems.Delete(addr)
+				delete(handler.mems, addr)
 				ctx.Debugger().MemFree(addr)
 			}
 		}
@@ -3015,14 +3018,14 @@ func (env *env) ReleaseShortArrayElements_(ctx debugger.Context, _ any) {
 	ctx.ArgExtract(debugger.Calling_Default, &fake, &array, &elems, &mode)
 	addr := uint64(elems)
 	if handler, ok := env.getEnv(fake); ok {
-		if val, ok := handler.mems.Load(addr); ok {
+		if val, ok := handler.mems[addr]; ok {
 			elems := val.([]java.JShort)
 			if mode == 0 || mode == java.JNI_COMMIT {
 				ctx.ToPointer(addr).MemReadPtr(uint64(len(elems)*2), unsafe.Pointer(unsafe.SliceData(elems)))
 			}
 			handler.ReleaseShortArrayElements(array, elems, mode)
 			if mode == 0 || mode == java.JNI_ABORT {
-				handler.mems.Delete(addr)
+				delete(handler.mems, addr)
 				ctx.Debugger().MemFree(addr)
 			}
 		}
@@ -3038,14 +3041,14 @@ func (env *env) ReleaseIntArrayElements_(ctx debugger.Context, _ any) {
 	ctx.ArgExtract(debugger.Calling_Default, &fake, &array, &elems, &mode)
 	addr := uint64(elems)
 	if handler, ok := env.getEnv(fake); ok {
-		if val, ok := handler.mems.Load(addr); ok {
+		if val, ok := handler.mems[addr]; ok {
 			elems := val.([]java.JInt)
 			if mode == 0 || mode == java.JNI_COMMIT {
 				ctx.ToPointer(addr).MemReadPtr(uint64(len(elems)*4), unsafe.Pointer(unsafe.SliceData(elems)))
 			}
 			handler.ReleaseIntArrayElements(array, elems, mode)
 			if mode == 0 || mode == java.JNI_ABORT {
-				handler.mems.Delete(addr)
+				delete(handler.mems, addr)
 				ctx.Debugger().MemFree(addr)
 			}
 		}
@@ -3061,14 +3064,14 @@ func (env *env) ReleaseLongArrayElements_(ctx debugger.Context, _ any) {
 	ctx.ArgExtract(debugger.Calling_Default, &fake, &array, &elems, &mode)
 	addr := uint64(elems)
 	if handler, ok := env.getEnv(fake); ok {
-		if val, ok := handler.mems.Load(addr); ok {
+		if val, ok := handler.mems[addr]; ok {
 			elems := val.([]java.JLong)
 			if mode == 0 || mode == java.JNI_COMMIT {
 				ctx.ToPointer(addr).MemReadPtr(uint64(len(elems)*8), unsafe.Pointer(unsafe.SliceData(elems)))
 			}
 			handler.ReleaseLongArrayElements(array, elems, mode)
 			if mode == 0 || mode == java.JNI_ABORT {
-				handler.mems.Delete(addr)
+				delete(handler.mems, addr)
 				ctx.Debugger().MemFree(addr)
 			}
 		}
@@ -3084,14 +3087,14 @@ func (env *env) ReleaseFloatArrayElements_(ctx debugger.Context, _ any) {
 	ctx.ArgExtract(debugger.Calling_Default, &fake, &array, &elems, &mode)
 	addr := uint64(elems)
 	if handler, ok := env.getEnv(fake); ok {
-		if val, ok := handler.mems.Load(addr); ok {
+		if val, ok := handler.mems[addr]; ok {
 			elems := val.([]java.JFloat)
 			if mode == 0 || mode == java.JNI_COMMIT {
 				ctx.ToPointer(addr).MemReadPtr(uint64(len(elems)*4), unsafe.Pointer(unsafe.SliceData(elems)))
 			}
 			handler.ReleaseFloatArrayElements(array, elems, mode)
 			if mode == 0 || mode == java.JNI_ABORT {
-				handler.mems.Delete(addr)
+				delete(handler.mems, addr)
 				ctx.Debugger().MemFree(addr)
 			}
 		}
@@ -3107,14 +3110,14 @@ func (env *env) ReleaseDoubleArrayElements_(ctx debugger.Context, _ any) {
 	ctx.ArgExtract(debugger.Calling_Default, &fake, &array, &elems, &mode)
 	addr := uint64(elems)
 	if handler, ok := env.getEnv(fake); ok {
-		if val, ok := handler.mems.Load(addr); ok {
+		if val, ok := handler.mems[addr]; ok {
 			elems := val.([]java.JDouble)
 			if mode == 0 || mode == java.JNI_COMMIT {
 				ctx.ToPointer(addr).MemReadPtr(uint64(len(elems)*8), unsafe.Pointer(unsafe.SliceData(elems)))
 			}
 			handler.ReleaseDoubleArrayElements(array, elems, mode)
 			if mode == 0 || mode == java.JNI_ABORT {
-				handler.mems.Delete(addr)
+				delete(handler.mems, addr)
 				ctx.Debugger().MemFree(addr)
 			}
 		}
@@ -3457,7 +3460,7 @@ func (env *env) GetPrimitiveArrayCritical_(ctx debugger.Context, _ any) {
 		addr, err := ctx.Debugger().MemAlloc(uint64(len(raw)))
 		if err == nil {
 			ctx.ToPointer(addr).MemWrite(raw)
-			handler.mems.Store(addr, raw)
+			handler.mems[addr] = raw
 		}
 		ctx.RetWrite(uintptr(addr))
 	} else {
@@ -3474,7 +3477,7 @@ func (env *env) ReleasePrimitiveArrayCritical_(ctx debugger.Context, _ any) {
 	ctx.ArgExtract(debugger.Calling_Default, &fake, &array, &carray, &mode)
 	addr := uint64(carray)
 	if handler, ok := env.getEnv(fake); ok {
-		if val, ok := handler.mems.Load(addr); ok {
+		if val, ok := handler.mems[addr]; ok {
 			raw := val.([]byte)
 			if mode == 0 || mode == java.JNI_COMMIT {
 				ctx.ToPointer(addr).MemReadPtr(uint64(len(raw)), unsafe.Pointer(unsafe.SliceData(raw)))
@@ -3499,7 +3502,7 @@ func (env *env) GetStringCritical_(ctx debugger.Context, _ any) {
 		if err == nil {
 			ctx.ToPointer(addr).MemWritePtr(size, unsafe.Pointer(unsafe.SliceData(chars)))
 			ctx.ToPointer(addr+size).MemWritePtr(2, unsafe.Pointer(&null))
-			handler.mems.Store(addr, chars)
+			handler.mems[addr] = chars
 		}
 		ctx.RetWrite(uintptr(addr))
 	} else {
@@ -3515,7 +3518,8 @@ func (env *env) ReleaseStringCritical_(ctx debugger.Context, _ any) {
 	ctx.ArgExtract(debugger.Calling_Default, &fake, &str, &carray)
 	addr := uint64(carray)
 	if handler, ok := env.getEnv(fake); ok {
-		if val, ok := handler.mems.LoadAndDelete(addr); ok {
+		if val, ok := handler.mems[addr]; ok {
+			delete(handler.mems, addr)
 			handler.ReleaseStringCritical(str, val.([]java.JChar))
 			ctx.Debugger().MemFree(addr)
 		}
@@ -3606,10 +3610,10 @@ func (env *env) GetObjectRefType_(ctx debugger.Context, _ any) {
 }
 
 func (env *jniEnv) Close() error {
-	for v := range env.mems.Range {
-		env.dbg.MemFree(v.(uint64))
+	for v := range env.mems {
+		env.dbg.MemFree(v)
 	}
-	env.mems.Clear()
+	env.mems = nil
 	return env.release()
 }
 

@@ -26,18 +26,12 @@ func (sym Symbol) Address() uint64 {
 }
 
 func (sym Symbol) Call(ctx context.Context, calling debugger.Calling, ret any, args ...any) error {
-	task, err := sym.dbg.CreateTask(ctx)
-	if err != nil {
-		return err
-	}
-	defer task.Close()
-	return sym.call(task, calling, ret, args...)
-}
-
-func (sym Symbol) MainCall(ctx context.Context, calling debugger.Calling, ret any, args ...any) error {
 	task, err := sym.dbg.GetMainTask(ctx)
 	if err != nil {
-		return err
+		task, err = sym.dbg.CreateTask(ctx)
+		if err != nil {
+			return err
+		}
 	}
 	defer task.Close()
 	return sym.call(task, calling, ret, args...)
