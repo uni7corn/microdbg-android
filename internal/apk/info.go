@@ -49,7 +49,7 @@ func (info *info) Close() error {
 }
 
 func (info *info) Link(art android.Runtime) {
-	switch art.Emulator().Arch() {
+	switch art.Debugger().Arch() {
 	case emulator.ARCH_ARM:
 		info.lib = "/data/app/" + info.rdn + "/lib/arm"
 	case emulator.ARCH_ARM64:
@@ -127,7 +127,7 @@ func (info *info) Certificate() []*x509.Certificate {
 
 func (info *info) LoadModule(ctx context.Context, art android.Runtime, name string) (android.Module, error) {
 	var path string
-	switch art.Emulator().Arch() {
+	switch art.Debugger().Arch() {
 	case emulator.ARCH_ARM:
 		path = "lib/armeabi-v7a/lib" + name + ".so"
 	case emulator.ARCH_ARM64:

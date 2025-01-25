@@ -110,7 +110,7 @@ func (l *linker) initTLS(art internal.Runtime) error {
 	default:
 		return emulator.ErrArchUnsupported
 	}
-	task, err := dbg.CreateTask(context.TODO())
+	task, err := dbg.GetMainTask(context.TODO())
 	if err != nil {
 		return err
 	}

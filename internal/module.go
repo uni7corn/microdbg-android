@@ -47,7 +47,7 @@ func (m *module) Symbols(yield func(android.Symbol) bool) {
 
 func (m *module) CallEntry(ctx context.Context) error {
 	sym := NewSymbol(m.art.Debugger(), "start", m.Module.EntryAddr())
-	return sym.Call(ctx, debugger.Calling_Default, nil)
+	return sym.MainCall(ctx, debugger.Calling_Default, nil)
 }
 
 func (m *module) CallOnLoad(ctx context.Context) (java.JInt, error) {
@@ -56,7 +56,7 @@ func (m *module) CallOnLoad(ctx context.Context) (java.JInt, error) {
 		return 0, err
 	}
 	var r java.JInt
-	err = sym.Call(ctx, debugger.Calling_Default, &r, m.art.JavaVM(), nil)
+	err = sym.MainCall(ctx, debugger.Calling_Default, &r, m.art.JavaVM(), nil)
 	return r, err
 }
 

@@ -31,9 +31,22 @@ func (sym Symbol) Call(ctx context.Context, calling debugger.Calling, ret any, a
 		return err
 	}
 	defer task.Close()
+	return sym.call(task, calling, ret, args...)
+}
+
+func (sym Symbol) MainCall(ctx context.Context, calling debugger.Calling, ret any, args ...any) error {
+	task, err := sym.dbg.GetMainTask(ctx)
+	if err != nil {
+		return err
+	}
+	defer task.Close()
+	return sym.call(task, calling, ret, args...)
+}
+
+func (sym Symbol) call(task debugger.Task, calling debugger.Calling, ret any, args ...any) error {
 	taskCtx := task.Context()
 	taskCtx.ArgWrite(calling, args...)
-	err = sym.dbg.CallTaskOf(task, sym.addr)
+	err := sym.dbg.CallTaskOf(task, sym.addr)
 	if err != nil {
 		return err
 	}

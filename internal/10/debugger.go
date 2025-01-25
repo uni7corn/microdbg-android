@@ -85,7 +85,7 @@ func (dbg *dbg) FindModule(name string) (debugger.Module, error) {
 		return module, nil
 	}
 	var file filesystem.File
-	switch dbg.Emulator().Arch() {
+	switch dbg.Arch() {
 	case emulator.ARCH_ARM, emulator.ARCH_X86:
 		file, err = dbg.OpenFile("/system/lib/"+name, filesystem.O_RDONLY, 0)
 	case emulator.ARCH_ARM64, emulator.ARCH_X86_64:
