@@ -80,7 +80,7 @@ func init() {
 	definePrimitiveMethod(FakeCollectionClass, "toArray", "(Ljava/lang/Object;)[Ljava/lang/Object;", Modifier_PUBLIC|Modifier_ABSTRACT).BindCall(func(obj java.IObject, args ...any) any {
 		fake := obj.(FakeObject)
 		list := fake.Value().(*[]java.IObject)
-		a := args[0].(java.IGenericArray[java.IObject])
+		a := args[0].(java.IObjectArray)
 		copy(a.Elements(), *list)
 		return a
 	})

@@ -8,7 +8,8 @@ import (
 type Package interface {
 	Name() string
 	Label() string
-	Version() (name string, code string)
+	Version() (name string, code int)
+	UsesSdk() (min, target int)
 	Permission() []string
 	CodePath() string
 	LibraryDir() string

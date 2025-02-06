@@ -12,7 +12,7 @@ type FakeObject interface {
 	java.IObject
 	Value() any
 	FakeProperty
-	CallMethod(method java.IMethod, args ...any) any
+	FindMethod(name, sig string) FakeMethod
 }
 
 type fakeObject struct {
@@ -48,12 +48,12 @@ func (obj *fakeObject) Value() any {
 	return obj.val
 }
 
-func (obj *fakeObject) CallMethod(method java.IMethod, args ...any) any {
-	fake := obj.cls.FindMethod(method.GetName().String(), GetMethodDescriptor(method))
-	if fake == nil {
-		return method.CallPrimitive(obj, args...)
+func (obj *fakeObject) FindMethod(name, sig string) FakeMethod {
+	method := obj.cls.FindMethod(name, sig)
+	if method == nil || IsStatic(method) {
+		return nil
 	}
-	return fake.CallPrimitive(obj, args...)
+	return method
 }
 
 func ToObject[O java.IObject](v any) O {

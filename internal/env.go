@@ -12,6 +12,10 @@ import (
 	"github.com/wnxd/microdbg/debugger"
 )
 
+type findMethod interface {
+	FindMethod(name, sig string) gava.FakeMethod
+}
+
 type Environ struct {
 	APK     Package
 	JNI     android.JNIEnv
@@ -103,6 +107,7 @@ func (env *Environ) AllocObject(clazz java.IClass) java.IObject {
 }
 
 func (env *Environ) NewObject(clazz java.IClass, method java.IMethod, args ...any) java.IObject {
+	defer env.handleException()
 	return method.Call(clazz, args...)
 }
 
@@ -125,133 +130,142 @@ func (env *Environ) GetMethod(clazz java.IClass, name string, sig string) java.I
 }
 
 func (env *Environ) CallObjectMethod(obj java.IObject, method java.IMethod, args ...any) java.IObject {
-	if call, ok := obj.(interface {
-		CallMethod(java.IMethod, ...any) any
-	}); ok {
-		return gava.ToObject[java.IObject](call.CallMethod(method, args...))
+	defer env.handleException()
+	if find, ok := obj.(findMethod); !ok {
+	} else if m := find.FindMethod(gava.GetMethodDescriptor(method)); m != nil {
+		method = m
 	}
 	return method.Call(obj, args...)
 }
 
 func (env *Environ) CallBooleanMethod(obj java.IObject, method java.IMethod, args ...any) java.JBoolean {
-	if call, ok := obj.(interface {
-		CallMethod(java.IMethod, ...any) any
-	}); ok {
-		return call.CallMethod(method, args...).(java.JBoolean)
+	defer env.handleException()
+	if find, ok := obj.(findMethod); !ok {
+	} else if m := find.FindMethod(gava.GetMethodDescriptor(method)); m != nil {
+		method = m
 	}
 	return method.CallPrimitive(obj, args...).(java.JBoolean)
 }
 
 func (env *Environ) CallByteMethod(obj java.IObject, method java.IMethod, args ...any) java.JByte {
-	if call, ok := obj.(interface {
-		CallMethod(java.IMethod, ...any) any
-	}); ok {
-		return call.CallMethod(method, args...).(java.JByte)
+	defer env.handleException()
+	if find, ok := obj.(findMethod); !ok {
+	} else if m := find.FindMethod(gava.GetMethodDescriptor(method)); m != nil {
+		method = m
 	}
 	return method.CallPrimitive(obj, args...).(java.JByte)
 }
 
 func (env *Environ) CallCharMethod(obj java.IObject, method java.IMethod, args ...any) java.JChar {
-	if call, ok := obj.(interface {
-		CallMethod(java.IMethod, ...any) any
-	}); ok {
-		return call.CallMethod(method, args...).(java.JChar)
+	defer env.handleException()
+	if find, ok := obj.(findMethod); !ok {
+	} else if m := find.FindMethod(gava.GetMethodDescriptor(method)); m != nil {
+		method = m
 	}
 	return method.CallPrimitive(obj, args...).(java.JChar)
 }
 
 func (env *Environ) CallShortMethod(obj java.IObject, method java.IMethod, args ...any) java.JShort {
-	if call, ok := obj.(interface {
-		CallMethod(java.IMethod, ...any) any
-	}); ok {
-		return call.CallMethod(method, args...).(java.JShort)
+	defer env.handleException()
+	if find, ok := obj.(findMethod); !ok {
+	} else if m := find.FindMethod(gava.GetMethodDescriptor(method)); m != nil {
+		method = m
 	}
 	return method.CallPrimitive(obj, args...).(java.JShort)
 }
 
 func (env *Environ) CallIntMethod(obj java.IObject, method java.IMethod, args ...any) java.JInt {
-	if call, ok := obj.(interface {
-		CallMethod(java.IMethod, ...any) any
-	}); ok {
-		return call.CallMethod(method, args...).(java.JInt)
+	defer env.handleException()
+	if find, ok := obj.(findMethod); !ok {
+	} else if m := find.FindMethod(gava.GetMethodDescriptor(method)); m != nil {
+		method = m
 	}
 	return method.CallPrimitive(obj, args...).(java.JInt)
 }
 
 func (env *Environ) CallLongMethod(obj java.IObject, method java.IMethod, args ...any) java.JLong {
-	if call, ok := obj.(interface {
-		CallMethod(java.IMethod, ...any) any
-	}); ok {
-		return call.CallMethod(method, args...).(java.JLong)
+	defer env.handleException()
+	if find, ok := obj.(findMethod); !ok {
+	} else if m := find.FindMethod(gava.GetMethodDescriptor(method)); m != nil {
+		method = m
 	}
 	return method.CallPrimitive(obj, args...).(java.JLong)
 }
 
 func (env *Environ) CallFloatMethod(obj java.IObject, method java.IMethod, args ...any) java.JFloat {
-	if call, ok := obj.(interface {
-		CallMethod(java.IMethod, ...any) any
-	}); ok {
-		return call.CallMethod(method, args...).(java.JFloat)
+	defer env.handleException()
+	if find, ok := obj.(findMethod); !ok {
+	} else if m := find.FindMethod(gava.GetMethodDescriptor(method)); m != nil {
+		method = m
 	}
 	return method.CallPrimitive(obj, args...).(java.JFloat)
 }
 
 func (env *Environ) CallDoubleMethod(obj java.IObject, method java.IMethod, args ...any) java.JDouble {
-	if call, ok := obj.(interface {
-		CallMethod(java.IMethod, ...any) any
-	}); ok {
-		return call.CallMethod(method, args...).(java.JDouble)
+	defer env.handleException()
+	if find, ok := obj.(findMethod); !ok {
+	} else if m := find.FindMethod(gava.GetMethodDescriptor(method)); m != nil {
+		method = m
 	}
 	return method.CallPrimitive(obj, args...).(java.JDouble)
 }
 
 func (env *Environ) CallVoidMethod(obj java.IObject, method java.IMethod, args ...any) {
-	if call, ok := obj.(interface {
-		CallMethod(java.IMethod, ...any) any
-	}); ok {
-		call.CallMethod(method, args...)
-	} else {
-		method.CallPrimitive(obj, args...)
+	defer env.handleException()
+	if find, ok := obj.(findMethod); !ok {
+	} else if m := find.FindMethod(gava.GetMethodDescriptor(method)); m != nil {
+		method = m
 	}
+	method.CallPrimitive(obj, args...)
 }
 
 func (env *Environ) CallNonvirtualObjectMethod(obj java.IObject, clazz java.IClass, method java.IMethod, args ...any) java.IObject {
+	defer env.handleException()
 	return method.Call(obj, args...)
 }
 
 func (env *Environ) CallNonvirtualBooleanMethod(obj java.IObject, clazz java.IClass, method java.IMethod, args ...any) java.JBoolean {
+	defer env.handleException()
 	return method.CallPrimitive(obj, args...).(java.JBoolean)
 }
 
 func (env *Environ) CallNonvirtualByteMethod(obj java.IObject, clazz java.IClass, method java.IMethod, args ...any) java.JByte {
+	defer env.handleException()
 	return method.CallPrimitive(obj, args...).(java.JByte)
 }
 
 func (env *Environ) CallNonvirtualCharMethod(obj java.IObject, clazz java.IClass, method java.IMethod, args ...any) java.JChar {
+	defer env.handleException()
 	return method.CallPrimitive(obj, args...).(java.JChar)
 }
 
 func (env *Environ) CallNonvirtualShortMethod(obj java.IObject, clazz java.IClass, method java.IMethod, args ...any) java.JShort {
+	defer env.handleException()
 	return method.CallPrimitive(obj, args...).(java.JShort)
 }
 
 func (env *Environ) CallNonvirtualIntMethod(obj java.IObject, clazz java.IClass, method java.IMethod, args ...any) java.JInt {
+	defer env.handleException()
 	return method.CallPrimitive(obj, args...).(java.JInt)
 }
 
 func (env *Environ) CallNonvirtualLongMethod(obj java.IObject, clazz java.IClass, method java.IMethod, args ...any) java.JLong {
+	defer env.handleException()
 	return method.CallPrimitive(obj, args...).(java.JLong)
 }
 
 func (env *Environ) CallNonvirtualFloatMethod(obj java.IObject, clazz java.IClass, method java.IMethod, args ...any) java.JFloat {
+	defer env.handleException()
 	return method.CallPrimitive(obj, args...).(java.JFloat)
 }
 
 func (env *Environ) CallNonvirtualDoubleMethod(obj java.IObject, clazz java.IClass, method java.IMethod, args ...any) java.JDouble {
+	defer env.handleException()
 	return method.CallPrimitive(obj, args...).(java.JDouble)
 }
 
 func (env *Environ) CallNonvirtualVoidMethod(obj java.IObject, clazz java.IClass, method java.IMethod, args ...any) {
+	defer env.handleException()
 	method.CallPrimitive(obj, args...)
 }
 
@@ -360,42 +374,52 @@ func (env *Environ) GetStaticMethod(clazz java.IClass, name string, sig string) 
 }
 
 func (env *Environ) CallStaticObjectMethod(clazz java.IClass, method java.IMethod, args ...any) java.IObject {
+	defer env.handleException()
 	return method.Call(clazz, args...)
 }
 
 func (env *Environ) CallStaticBooleanMethod(clazz java.IClass, method java.IMethod, args ...any) java.JBoolean {
+	defer env.handleException()
 	return method.CallPrimitive(clazz, args...).(java.JBoolean)
 }
 
 func (env *Environ) CallStaticByteMethod(clazz java.IClass, method java.IMethod, args ...any) java.JByte {
+	defer env.handleException()
 	return method.CallPrimitive(clazz, args...).(java.JByte)
 }
 
 func (env *Environ) CallStaticCharMethod(clazz java.IClass, method java.IMethod, args ...any) java.JChar {
+	defer env.handleException()
 	return method.CallPrimitive(clazz, args...).(java.JChar)
 }
 
 func (env *Environ) CallStaticShortMethod(clazz java.IClass, method java.IMethod, args ...any) java.JShort {
+	defer env.handleException()
 	return method.CallPrimitive(clazz, args...).(java.JShort)
 }
 
 func (env *Environ) CallStaticIntMethod(clazz java.IClass, method java.IMethod, args ...any) java.JInt {
+	defer env.handleException()
 	return method.CallPrimitive(clazz, args...).(java.JInt)
 }
 
 func (env *Environ) CallStaticLongMethod(clazz java.IClass, method java.IMethod, args ...any) java.JLong {
+	defer env.handleException()
 	return method.CallPrimitive(clazz, args...).(java.JLong)
 }
 
 func (env *Environ) CallStaticFloatMethod(clazz java.IClass, method java.IMethod, args ...any) java.JFloat {
+	defer env.handleException()
 	return method.CallPrimitive(clazz, args...).(java.JFloat)
 }
 
 func (env *Environ) CallStaticDoubleMethod(clazz java.IClass, method java.IMethod, args ...any) java.JDouble {
+	defer env.handleException()
 	return method.CallPrimitive(clazz, args...).(java.JDouble)
 }
 
 func (env *Environ) CallStaticVoidMethod(clazz java.IClass, method java.IMethod, args ...any) {
+	defer env.handleException()
 	method.CallPrimitive(clazz, args...)
 }
 
@@ -499,63 +523,63 @@ func (env *Environ) NewStringUTF(bytes string) java.IString {
 	return must(env.JNI.NewStringUTF(env, bytes))
 }
 
-func (env *Environ) NewObjectArray(length java.JSize, elementClass java.IClass, initialElement java.IObject) java.IGenericArray[java.IObject] {
+func (env *Environ) NewObjectArray(length java.JSize, elementClass java.IClass, initialElement java.IObject) java.IObjectArray {
 	if env.JNI == nil {
 		return nil
 	}
 	return must(env.JNI.NewObjectArray(env, length, elementClass, initialElement))
 }
 
-func (env *Environ) NewBooleanArray(length java.JSize) java.IGenericArray[java.JBoolean] {
+func (env *Environ) NewBooleanArray(length java.JSize) java.IBooleanArray {
 	if env.JNI == nil {
 		return nil
 	}
 	return must(env.JNI.NewBooleanArray(env, length))
 }
 
-func (env *Environ) NewByteArray(length java.JSize) java.IGenericArray[java.JByte] {
+func (env *Environ) NewByteArray(length java.JSize) java.IByteArray {
 	if env.JNI == nil {
 		return nil
 	}
 	return must(env.JNI.NewByteArray(env, length))
 }
 
-func (env *Environ) NewCharArray(length java.JSize) java.IGenericArray[java.JChar] {
+func (env *Environ) NewCharArray(length java.JSize) java.ICharArray {
 	if env.JNI == nil {
 		return nil
 	}
 	return must(env.JNI.NewCharArray(env, length))
 }
 
-func (env *Environ) NewShortArray(length java.JSize) java.IGenericArray[java.JShort] {
+func (env *Environ) NewShortArray(length java.JSize) java.IShortArray {
 	if env.JNI == nil {
 		return nil
 	}
 	return must(env.JNI.NewShortArray(env, length))
 }
 
-func (env *Environ) NewIntArray(length java.JSize) java.IGenericArray[java.JInt] {
+func (env *Environ) NewIntArray(length java.JSize) java.IIntArray {
 	if env.JNI == nil {
 		return nil
 	}
 	return must(env.JNI.NewIntArray(env, length))
 }
 
-func (env *Environ) NewLongArray(length java.JSize) java.IGenericArray[java.JLong] {
+func (env *Environ) NewLongArray(length java.JSize) java.ILongArray {
 	if env.JNI == nil {
 		return nil
 	}
 	return must(env.JNI.NewLongArray(env, length))
 }
 
-func (env *Environ) NewFloatArray(length java.JSize) java.IGenericArray[java.JFloat] {
+func (env *Environ) NewFloatArray(length java.JSize) java.IFloatArray {
 	if env.JNI == nil {
 		return nil
 	}
 	return must(env.JNI.NewFloatArray(env, length))
 }
 
-func (env *Environ) NewDoubleArray(length java.JSize) java.IGenericArray[java.JDouble] {
+func (env *Environ) NewDoubleArray(length java.JSize) java.IDoubleArray {
 	if env.JNI == nil {
 		return nil
 	}
@@ -580,6 +604,15 @@ func (env *Environ) UnregisterNatives(clazz java.IClass) java.JInt {
 
 func (env *Environ) ExceptionCheck() java.JBoolean {
 	return env.ex != nil
+}
+
+func (env *Environ) handleException() {
+	if ex := recover(); ex == nil {
+	} else if t, ok := ex.(java.IThrowable); ok {
+		env.Throw(t)
+	} else {
+		panic(ex)
+	}
 }
 
 func must[V any](r V, _ error) V {

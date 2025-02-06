@@ -1,6 +1,10 @@
 package java
 
-import java "github.com/wnxd/microdbg-java"
+import (
+	"strings"
+
+	java "github.com/wnxd/microdbg-java"
+)
 
 type defaultFactory map[string]FakeClass
 
@@ -163,6 +167,17 @@ var (
 		name: "java.lang.CharSequence",
 		mod:  Modifier_PUBLIC | Modifier_INTERFACE | Modifier_ABSTRACT,
 	}
+	FakeThrowableClass = &fakeClass{
+		name:  "java.lang.Throwable",
+		super: FakeObjectClass,
+		iface: []java.IClass{FakeSerializableClass},
+		mod:   Modifier_PUBLIC,
+	}
+	FakeExceptionClass = &fakeClass{
+		name:  "java.lang.Exception",
+		super: FakeThrowableClass,
+		mod:   Modifier_PUBLIC,
+	}
 
 	FakeZArrayClass      = arrayOf(nil, FakeBooleanTYPE)
 	FakeBArrayClass      = arrayOf(nil, FakeByteTYPE)
@@ -213,11 +228,13 @@ func (defaultFactory) WrapClass(java.IClass) FakeClass {
 }
 
 func (defaultFactory) FindClass(name string) (FakeClass, bool) {
+	name = strings.ReplaceAll(name, "/", ".")
 	cls, ok := defaultClasses[name]
 	return cls, ok
 }
 
 func (defaultFactory) GetClass(name string) FakeClass {
+	name = strings.ReplaceAll(name, "/", ".")
 	return defaultClasses[name]
 }
 

@@ -159,8 +159,8 @@ func (w *fakeWrapper) NewStringUTF(ctx android.JNIContext, bytes string) (java.I
 	return gava.FakeString(bytes), nil
 }
 
-func (w *fakeWrapper) NewObjectArray(ctx android.JNIContext, length java.JSize, elementClass java.IClass, initialElement java.IObject) (java.IGenericArray[java.IObject], error) {
-	arr := elementClass.(gava.FakeClass).NewArray(int(length)).(java.IGenericArray[java.IObject])
+func (w *fakeWrapper) NewObjectArray(ctx android.JNIContext, length java.JSize, elementClass java.IClass, initialElement java.IObject) (java.IObjectArray, error) {
+	arr := elementClass.(gava.FakeClass).NewArray(int(length)).(java.IObjectArray)
 	if initialElement != nil {
 		raw := arr.Elements()
 		for i := range raw {
@@ -170,36 +170,36 @@ func (w *fakeWrapper) NewObjectArray(ctx android.JNIContext, length java.JSize, 
 	return arr, nil
 }
 
-func (w *fakeWrapper) NewBooleanArray(ctx android.JNIContext, length java.JSize) (java.IGenericArray[java.JBoolean], error) {
-	return gava.FakeBooleanTYPE.NewArray(int(length)).(java.IGenericArray[java.JBoolean]), nil
+func (w *fakeWrapper) NewBooleanArray(ctx android.JNIContext, length java.JSize) (java.IBooleanArray, error) {
+	return gava.FakeBooleanTYPE.NewArray(int(length)).(java.IBooleanArray), nil
 }
 
-func (w *fakeWrapper) NewByteArray(ctx android.JNIContext, length java.JSize) (java.IGenericArray[java.JByte], error) {
-	return gava.FakeByteTYPE.NewArray(int(length)).(java.IGenericArray[java.JByte]), nil
+func (w *fakeWrapper) NewByteArray(ctx android.JNIContext, length java.JSize) (java.IByteArray, error) {
+	return gava.FakeByteTYPE.NewArray(int(length)).(java.IByteArray), nil
 }
 
-func (w *fakeWrapper) NewCharArray(ctx android.JNIContext, length java.JSize) (java.IGenericArray[java.JChar], error) {
-	return gava.FakeCharTYPE.NewArray(int(length)).(java.IGenericArray[java.JChar]), nil
+func (w *fakeWrapper) NewCharArray(ctx android.JNIContext, length java.JSize) (java.ICharArray, error) {
+	return gava.FakeCharTYPE.NewArray(int(length)).(java.ICharArray), nil
 }
 
-func (w *fakeWrapper) NewShortArray(ctx android.JNIContext, length java.JSize) (java.IGenericArray[java.JShort], error) {
-	return gava.FakeShortTYPE.NewArray(int(length)).(java.IGenericArray[java.JShort]), nil
+func (w *fakeWrapper) NewShortArray(ctx android.JNIContext, length java.JSize) (java.IShortArray, error) {
+	return gava.FakeShortTYPE.NewArray(int(length)).(java.IShortArray), nil
 }
 
-func (w *fakeWrapper) NewIntArray(ctx android.JNIContext, length java.JSize) (java.IGenericArray[java.JInt], error) {
-	return gava.FakeIntTYPE.NewArray(int(length)).(java.IGenericArray[java.JInt]), nil
+func (w *fakeWrapper) NewIntArray(ctx android.JNIContext, length java.JSize) (java.IIntArray, error) {
+	return gava.FakeIntTYPE.NewArray(int(length)).(java.IIntArray), nil
 }
 
-func (w *fakeWrapper) NewLongArray(ctx android.JNIContext, length java.JSize) (java.IGenericArray[java.JLong], error) {
-	return gava.FakeLongTYPE.NewArray(int(length)).(java.IGenericArray[java.JLong]), nil
+func (w *fakeWrapper) NewLongArray(ctx android.JNIContext, length java.JSize) (java.ILongArray, error) {
+	return gava.FakeLongTYPE.NewArray(int(length)).(java.ILongArray), nil
 }
 
-func (w *fakeWrapper) NewFloatArray(ctx android.JNIContext, length java.JSize) (java.IGenericArray[java.JFloat], error) {
-	return gava.FakeFloatTYPE.NewArray(int(length)).(java.IGenericArray[java.JFloat]), nil
+func (w *fakeWrapper) NewFloatArray(ctx android.JNIContext, length java.JSize) (java.IFloatArray, error) {
+	return gava.FakeFloatTYPE.NewArray(int(length)).(java.IFloatArray), nil
 }
 
-func (w *fakeWrapper) NewDoubleArray(ctx android.JNIContext, length java.JSize) (java.IGenericArray[java.JDouble], error) {
-	return gava.FakeDoubleTYPE.NewArray(int(length)).(java.IGenericArray[java.JDouble]), nil
+func (w *fakeWrapper) NewDoubleArray(ctx android.JNIContext, length java.JSize) (java.IDoubleArray, error) {
+	return gava.FakeDoubleTYPE.NewArray(int(length)).(java.IDoubleArray), nil
 }
 
 func (w *fakeWrapper) ClassFactory() gava.ClassFactory {

@@ -47,14 +47,14 @@ func loadWithZip(z *zip.ReadCloser) (internal.Package, error) {
 		return nil, err
 	}
 	info := &info{
-		fs:   z,
-		name: manifest.Package,
-		version: version{
-			name: manifest.VersionName,
-			code: manifest.VersionCode,
-		},
+		fs:         z,
+		name:       manifest.Package,
+		version:    version{name: manifest.VersionName},
 		permission: make([]string, len(manifest.UsesPermission)),
 	}
+	info.version.code, _ = strconv.Atoi(manifest.VersionCode)
+	info.sdk.min, _ = strconv.Atoi(manifest.UsesSdk.MinSdkVersion)
+	info.sdk.target, _ = strconv.Atoi(manifest.UsesSdk.TargetSdkVersion)
 	label := strings.TrimPrefix(manifest.Application.Label, "0x")
 	id, _ := strconv.ParseInt(label, 16, 0)
 	if value, ok := resources.Get(int(id)); ok {

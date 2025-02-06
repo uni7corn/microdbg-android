@@ -17,7 +17,12 @@ import (
 
 type version struct {
 	name string
-	code string
+	code int
+}
+
+type sdk struct {
+	min    int
+	target int
 }
 
 type info struct {
@@ -28,6 +33,7 @@ type info struct {
 	name       string
 	label      string
 	version    version
+	sdk        sdk
 	permission []string
 	rdn        string
 	code       string
@@ -81,8 +87,12 @@ func (info *info) Label() string {
 	return info.label
 }
 
-func (info *info) Version() (string, string) {
+func (info *info) Version() (string, int) {
 	return info.version.name, info.version.code
+}
+
+func (info *info) UsesSdk() (int, int) {
+	return info.sdk.min, info.sdk.target
 }
 
 func (info *info) Permission() []string {

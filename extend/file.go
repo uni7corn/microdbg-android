@@ -8,7 +8,7 @@ import (
 )
 
 func (ex *extend) defineFile() {
-	File := ex.cf.DefineClass("java/io/File")
+	File := ex.cf.DefineClass("java.io.File")
 	File.DefineMethod("toString", "()Ljava/lang/String;", gava.Modifier_PUBLIC).BindCall(func(obj java.IObject, args ...any) any {
 		fake := obj.(gava.FakeObject)
 		name := fake.Value().(string)

@@ -100,6 +100,11 @@ func BytesOf(arr []byte) java.IArray {
 	return FakeBArray(unsafe.Slice((*java.JByte)(unsafe.Pointer(unsafe.SliceData(arr))), len(arr)))
 }
 
+func GetBytes(arr java.IByteArray) []byte {
+	v := arr.Elements()
+	return unsafe.Slice((*byte)(unsafe.Pointer(unsafe.SliceData(v))), len(v))
+}
+
 func ArrayOf(cls FakeClass, arr any) java.IArray {
 	if arr == nil {
 		return nil

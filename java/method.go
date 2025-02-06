@@ -162,13 +162,14 @@ func (method *fakeMethod) parseDescriptor(cf ClassFactory, sig string) {
 		for n := 0; n < dim; n++ {
 			cls = cf.ArrayOf(cls)
 		}
+		dim = 0
 		method.params = append(method.params, cls)
 	}
 }
 
-func GetMethodDescriptor(method java.IMethod) string {
+func GetMethodDescriptor(method java.IMethod) (string, string) {
 	if i, ok := method.(interface{ Descriptor() string }); ok {
-		return i.Descriptor()
+		return method.GetName().String(), i.Descriptor()
 	}
 	var sb strings.Builder
 	sb.WriteByte('(')
@@ -181,5 +182,5 @@ func GetMethodDescriptor(method java.IMethod) string {
 	} else {
 		sb.WriteByte('V')
 	}
-	return sb.String()
+	return method.GetName().String(), sb.String()
 }

@@ -101,15 +101,15 @@ type AndroidEnv interface {
 	SetStaticDoubleField(java.IClass, java.IField, java.JDouble)
 	NewString([]java.JChar) java.IString
 	NewStringUTF(string) java.IString
-	NewObjectArray(java.JSize, java.IClass, java.IObject) java.IGenericArray[java.IObject]
-	NewBooleanArray(java.JSize) java.IGenericArray[java.JBoolean]
-	NewByteArray(java.JSize) java.IGenericArray[java.JByte]
-	NewCharArray(java.JSize) java.IGenericArray[java.JChar]
-	NewShortArray(java.JSize) java.IGenericArray[java.JShort]
-	NewIntArray(java.JSize) java.IGenericArray[java.JInt]
-	NewLongArray(java.JSize) java.IGenericArray[java.JLong]
-	NewFloatArray(java.JSize) java.IGenericArray[java.JFloat]
-	NewDoubleArray(java.JSize) java.IGenericArray[java.JDouble]
+	NewObjectArray(java.JSize, java.IClass, java.IObject) java.IObjectArray
+	NewBooleanArray(java.JSize) java.IBooleanArray
+	NewByteArray(java.JSize) java.IByteArray
+	NewCharArray(java.JSize) java.ICharArray
+	NewShortArray(java.JSize) java.IShortArray
+	NewIntArray(java.JSize) java.IIntArray
+	NewLongArray(java.JSize) java.ILongArray
+	NewFloatArray(java.JSize) java.IFloatArray
+	NewDoubleArray(java.JSize) java.IDoubleArray
 	RegisterNatives(java.IClass, []java.JNINativeMethod) java.JInt
 	UnregisterNatives(java.IClass) java.JInt
 	ExceptionCheck() java.JBoolean
@@ -1138,14 +1138,14 @@ func (env *jniEnv) NewObjectArray(length java.JSize, elementClass java.JClass, i
 }
 
 func (env *jniEnv) GetObjectArrayElement(array java.JGenericArray[java.JObject], index java.JSize) java.JObject {
-	if arr, ok := env.getArray(array).(java.IGenericArray[java.IObject]); ok {
+	if arr, ok := env.getArray(array).(java.IObjectArray); ok {
 		return env.ObjectRef(arr.Get(index))
 	}
 	return nil
 }
 
 func (env *jniEnv) SetObjectArrayElement(array java.JGenericArray[java.JObject], index java.JSize, value java.JObject) {
-	if arr, ok := env.getArray(array).(java.IGenericArray[java.IObject]); ok {
+	if arr, ok := env.getArray(array).(java.IObjectArray); ok {
 		arr.Set(index, env.GetObject(value))
 	}
 }
@@ -1183,56 +1183,56 @@ func (env *jniEnv) NewDoubleArray(length java.JSize) java.JGenericArray[java.JDo
 }
 
 func (env *jniEnv) GetBooleanArrayElements(array java.JGenericArray[java.JBoolean]) []java.JBoolean {
-	if arr, ok := env.getArray(array).(java.IGenericArray[java.JBoolean]); ok {
+	if arr, ok := env.getArray(array).(java.IBooleanArray); ok {
 		return arr.Elements()
 	}
 	return nil
 }
 
 func (env *jniEnv) GetByteArrayElements(array java.JGenericArray[java.JByte]) []java.JByte {
-	if arr, ok := env.getArray(array).(java.IGenericArray[java.JByte]); ok {
+	if arr, ok := env.getArray(array).(java.IByteArray); ok {
 		return arr.Elements()
 	}
 	return nil
 }
 
 func (env *jniEnv) GetCharArrayElements(array java.JGenericArray[java.JChar]) []java.JChar {
-	if arr, ok := env.getArray(array).(java.IGenericArray[java.JChar]); ok {
+	if arr, ok := env.getArray(array).(java.ICharArray); ok {
 		return arr.Elements()
 	}
 	return nil
 }
 
 func (env *jniEnv) GetShortArrayElements(array java.JGenericArray[java.JShort]) []java.JShort {
-	if arr, ok := env.getArray(array).(java.IGenericArray[java.JShort]); ok {
+	if arr, ok := env.getArray(array).(java.IShortArray); ok {
 		return arr.Elements()
 	}
 	return nil
 }
 
 func (env *jniEnv) GetIntArrayElements(array java.JGenericArray[java.JInt]) []java.JInt {
-	if arr, ok := env.getArray(array).(java.IGenericArray[java.JInt]); ok {
+	if arr, ok := env.getArray(array).(java.IIntArray); ok {
 		return arr.Elements()
 	}
 	return nil
 }
 
 func (env *jniEnv) GetLongArrayElements(array java.JGenericArray[java.JLong]) []java.JLong {
-	if arr, ok := env.getArray(array).(java.IGenericArray[java.JLong]); ok {
+	if arr, ok := env.getArray(array).(java.ILongArray); ok {
 		return arr.Elements()
 	}
 	return nil
 }
 
 func (env *jniEnv) GetFloatArrayElements(array java.JGenericArray[java.JFloat]) []java.JFloat {
-	if arr, ok := env.getArray(array).(java.IGenericArray[java.JFloat]); ok {
+	if arr, ok := env.getArray(array).(java.IFloatArray); ok {
 		return arr.Elements()
 	}
 	return nil
 }
 
 func (env *jniEnv) GetDoubleArrayElements(array java.JGenericArray[java.JDouble]) []java.JDouble {
-	if arr, ok := env.getArray(array).(java.IGenericArray[java.JDouble]); ok {
+	if arr, ok := env.getArray(array).(java.IDoubleArray); ok {
 		return arr.Elements()
 	}
 	return nil
@@ -1240,7 +1240,7 @@ func (env *jniEnv) GetDoubleArrayElements(array java.JGenericArray[java.JDouble]
 
 func (env *jniEnv) ReleaseBooleanArrayElements(array java.JGenericArray[java.JBoolean], elems []java.JBoolean, mode java.JInt) {
 	if mode == 0 || mode == java.JNI_COMMIT {
-		if arr, ok := env.getArray(array).(java.IGenericArray[java.JBoolean]); ok {
+		if arr, ok := env.getArray(array).(java.IBooleanArray); ok {
 			copy(arr.Elements(), elems)
 		}
 	}
@@ -1248,7 +1248,7 @@ func (env *jniEnv) ReleaseBooleanArrayElements(array java.JGenericArray[java.JBo
 
 func (env *jniEnv) ReleaseByteArrayElements(array java.JGenericArray[java.JByte], elems []java.JByte, mode java.JInt) {
 	if mode == 0 || mode == java.JNI_COMMIT {
-		if arr, ok := env.getArray(array).(java.IGenericArray[java.JByte]); ok {
+		if arr, ok := env.getArray(array).(java.IByteArray); ok {
 			copy(arr.Elements(), elems)
 		}
 	}
@@ -1256,7 +1256,7 @@ func (env *jniEnv) ReleaseByteArrayElements(array java.JGenericArray[java.JByte]
 
 func (env *jniEnv) ReleaseCharArrayElements(array java.JGenericArray[java.JChar], elems []java.JChar, mode java.JInt) {
 	if mode == 0 || mode == java.JNI_COMMIT {
-		if arr, ok := env.getArray(array).(java.IGenericArray[java.JChar]); ok {
+		if arr, ok := env.getArray(array).(java.ICharArray); ok {
 			copy(arr.Elements(), elems)
 		}
 	}
@@ -1264,7 +1264,7 @@ func (env *jniEnv) ReleaseCharArrayElements(array java.JGenericArray[java.JChar]
 
 func (env *jniEnv) ReleaseShortArrayElements(array java.JGenericArray[java.JShort], elems []java.JShort, mode java.JInt) {
 	if mode == 0 || mode == java.JNI_COMMIT {
-		if arr, ok := env.getArray(array).(java.IGenericArray[java.JShort]); ok {
+		if arr, ok := env.getArray(array).(java.IShortArray); ok {
 			copy(arr.Elements(), elems)
 		}
 	}
@@ -1272,7 +1272,7 @@ func (env *jniEnv) ReleaseShortArrayElements(array java.JGenericArray[java.JShor
 
 func (env *jniEnv) ReleaseIntArrayElements(array java.JGenericArray[java.JInt], elems []java.JInt, mode java.JInt) {
 	if mode == 0 || mode == java.JNI_COMMIT {
-		if arr, ok := env.getArray(array).(java.IGenericArray[java.JInt]); ok {
+		if arr, ok := env.getArray(array).(java.IIntArray); ok {
 			copy(arr.Elements(), elems)
 		}
 	}
@@ -1280,7 +1280,7 @@ func (env *jniEnv) ReleaseIntArrayElements(array java.JGenericArray[java.JInt], 
 
 func (env *jniEnv) ReleaseLongArrayElements(array java.JGenericArray[java.JLong], elems []java.JLong, mode java.JInt) {
 	if mode == 0 || mode == java.JNI_COMMIT {
-		if arr, ok := env.getArray(array).(java.IGenericArray[java.JLong]); ok {
+		if arr, ok := env.getArray(array).(java.ILongArray); ok {
 			copy(arr.Elements(), elems)
 		}
 	}
@@ -1288,7 +1288,7 @@ func (env *jniEnv) ReleaseLongArrayElements(array java.JGenericArray[java.JLong]
 
 func (env *jniEnv) ReleaseFloatArrayElements(array java.JGenericArray[java.JFloat], elems []java.JFloat, mode java.JInt) {
 	if mode == 0 || mode == java.JNI_COMMIT {
-		if arr, ok := env.getArray(array).(java.IGenericArray[java.JFloat]); ok {
+		if arr, ok := env.getArray(array).(java.IFloatArray); ok {
 			copy(arr.Elements(), elems)
 		}
 	}
@@ -1296,104 +1296,104 @@ func (env *jniEnv) ReleaseFloatArrayElements(array java.JGenericArray[java.JFloa
 
 func (env *jniEnv) ReleaseDoubleArrayElements(array java.JGenericArray[java.JDouble], elems []java.JDouble, mode java.JInt) {
 	if mode == 0 || mode == java.JNI_COMMIT {
-		if arr, ok := env.getArray(array).(java.IGenericArray[java.JDouble]); ok {
+		if arr, ok := env.getArray(array).(java.IDoubleArray); ok {
 			copy(arr.Elements(), elems)
 		}
 	}
 }
 
 func (env *jniEnv) GetBooleanArrayRegion(array java.JGenericArray[java.JBoolean], start java.JSize, buf []java.JBoolean) {
-	if arr, ok := env.getArray(array).(java.IGenericArray[java.JBoolean]); ok {
+	if arr, ok := env.getArray(array).(java.IBooleanArray); ok {
 		copy(buf, arr.Elements()[start:])
 	}
 }
 
 func (env *jniEnv) GetByteArrayRegion(array java.JGenericArray[java.JByte], start java.JSize, buf []java.JByte) {
-	if arr, ok := env.getArray(array).(java.IGenericArray[java.JByte]); ok {
+	if arr, ok := env.getArray(array).(java.IByteArray); ok {
 		copy(buf, arr.Elements()[start:])
 	}
 }
 
 func (env *jniEnv) GetCharArrayRegion(array java.JGenericArray[java.JChar], start java.JSize, buf []java.JChar) {
-	if arr, ok := env.getArray(array).(java.IGenericArray[java.JChar]); ok {
+	if arr, ok := env.getArray(array).(java.ICharArray); ok {
 		copy(buf, arr.Elements()[start:])
 	}
 }
 
 func (env *jniEnv) GetShortArrayRegion(array java.JGenericArray[java.JShort], start java.JSize, buf []java.JShort) {
-	if arr, ok := env.getArray(array).(java.IGenericArray[java.JShort]); ok {
+	if arr, ok := env.getArray(array).(java.IShortArray); ok {
 		copy(buf, arr.Elements()[start:])
 	}
 }
 
 func (env *jniEnv) GetIntArrayRegion(array java.JGenericArray[java.JInt], start java.JSize, buf []java.JInt) {
-	if arr, ok := env.getArray(array).(java.IGenericArray[java.JInt]); ok {
+	if arr, ok := env.getArray(array).(java.IIntArray); ok {
 		copy(buf, arr.Elements()[start:])
 	}
 }
 
 func (env *jniEnv) GetLongArrayRegion(array java.JGenericArray[java.JLong], start java.JSize, buf []java.JLong) {
-	if arr, ok := env.getArray(array).(java.IGenericArray[java.JLong]); ok {
+	if arr, ok := env.getArray(array).(java.ILongArray); ok {
 		copy(buf, arr.Elements()[start:])
 	}
 }
 
 func (env *jniEnv) GetFloatArrayRegion(array java.JGenericArray[java.JFloat], start java.JSize, buf []java.JFloat) {
-	if arr, ok := env.getArray(array).(java.IGenericArray[java.JFloat]); ok {
+	if arr, ok := env.getArray(array).(java.IFloatArray); ok {
 		copy(buf, arr.Elements()[start:])
 	}
 }
 
 func (env *jniEnv) GetDoubleArrayRegion(array java.JGenericArray[java.JDouble], start java.JSize, buf []java.JDouble) {
-	if arr, ok := env.getArray(array).(java.IGenericArray[java.JDouble]); ok {
+	if arr, ok := env.getArray(array).(java.IDoubleArray); ok {
 		copy(buf, arr.Elements()[start:])
 	}
 }
 
 func (env *jniEnv) SetBooleanArrayRegion(array java.JGenericArray[java.JBoolean], start java.JSize, buf []java.JBoolean) {
-	if arr, ok := env.getArray(array).(java.IGenericArray[java.JBoolean]); ok {
+	if arr, ok := env.getArray(array).(java.IBooleanArray); ok {
 		copy(arr.Elements()[start:], buf)
 	}
 }
 
 func (env *jniEnv) SetByteArrayRegion(array java.JGenericArray[java.JByte], start java.JSize, buf []java.JByte) {
-	if arr, ok := env.getArray(array).(java.IGenericArray[java.JByte]); ok {
+	if arr, ok := env.getArray(array).(java.IByteArray); ok {
 		copy(arr.Elements()[start:], buf)
 	}
 }
 
 func (env *jniEnv) SetCharArrayRegion(array java.JGenericArray[java.JChar], start java.JSize, buf []java.JChar) {
-	if arr, ok := env.getArray(array).(java.IGenericArray[java.JChar]); ok {
+	if arr, ok := env.getArray(array).(java.ICharArray); ok {
 		copy(arr.Elements()[start:], buf)
 	}
 }
 
 func (env *jniEnv) SetShortArrayRegion(array java.JGenericArray[java.JShort], start java.JSize, buf []java.JShort) {
-	if arr, ok := env.getArray(array).(java.IGenericArray[java.JShort]); ok {
+	if arr, ok := env.getArray(array).(java.IShortArray); ok {
 		copy(arr.Elements()[start:], buf)
 	}
 }
 
 func (env *jniEnv) SetIntArrayRegion(array java.JGenericArray[java.JInt], start java.JSize, buf []java.JInt) {
-	if arr, ok := env.getArray(array).(java.IGenericArray[java.JInt]); ok {
+	if arr, ok := env.getArray(array).(java.IIntArray); ok {
 		copy(arr.Elements()[start:], buf)
 	}
 }
 
 func (env *jniEnv) SetLongArrayRegion(array java.JGenericArray[java.JLong], start java.JSize, buf []java.JLong) {
-	if arr, ok := env.getArray(array).(java.IGenericArray[java.JLong]); ok {
+	if arr, ok := env.getArray(array).(java.ILongArray); ok {
 		copy(arr.Elements()[start:], buf)
 	}
 }
 
 func (env *jniEnv) SetFloatArrayRegion(array java.JGenericArray[java.JFloat], start java.JSize, buf []java.JFloat) {
-	if arr, ok := env.getArray(array).(java.IGenericArray[java.JFloat]); ok {
+	if arr, ok := env.getArray(array).(java.IFloatArray); ok {
 		copy(arr.Elements()[start:], buf)
 	}
 }
 
 func (env *jniEnv) SetDoubleArrayRegion(array java.JGenericArray[java.JDouble], start java.JSize, buf []java.JDouble) {
-	if arr, ok := env.getArray(array).(java.IGenericArray[java.JDouble]); ok {
+	if arr, ok := env.getArray(array).(java.IDoubleArray); ok {
 		copy(arr.Elements()[start:], buf)
 	}
 }
@@ -1434,28 +1434,28 @@ func (env *jniEnv) GetStringUTFRegion(str java.JString, start java.JSize, buf []
 
 func (env *jniEnv) GetPrimitiveArrayCritical(array java.JArray) []byte {
 	switch arr := env.getArray(array).(type) {
-	case java.IGenericArray[java.JBoolean]:
+	case java.IBooleanArray:
 		elems := arr.Elements()
 		return unsafe.Slice((*byte)(unsafe.Pointer(unsafe.SliceData(elems))), len(elems))
-	case java.IGenericArray[java.JByte]:
+	case java.IByteArray:
 		elems := arr.Elements()
 		return unsafe.Slice((*byte)(unsafe.Pointer(unsafe.SliceData(elems))), len(elems))
-	case java.IGenericArray[java.JChar]:
+	case java.ICharArray:
 		elems := arr.Elements()
 		return unsafe.Slice((*byte)(unsafe.Pointer(unsafe.SliceData(elems))), len(elems)*2)
-	case java.IGenericArray[java.JShort]:
+	case java.IShortArray:
 		elems := arr.Elements()
 		return unsafe.Slice((*byte)(unsafe.Pointer(unsafe.SliceData(elems))), len(elems)*2)
-	case java.IGenericArray[java.JInt]:
+	case java.IIntArray:
 		elems := arr.Elements()
 		return unsafe.Slice((*byte)(unsafe.Pointer(unsafe.SliceData(elems))), len(elems)*4)
-	case java.IGenericArray[java.JLong]:
+	case java.ILongArray:
 		elems := arr.Elements()
 		return unsafe.Slice((*byte)(unsafe.Pointer(unsafe.SliceData(elems))), len(elems)*8)
-	case java.IGenericArray[java.JFloat]:
+	case java.IFloatArray:
 		elems := arr.Elements()
 		return unsafe.Slice((*byte)(unsafe.Pointer(unsafe.SliceData(elems))), len(elems)*4)
-	case java.IGenericArray[java.JDouble]:
+	case java.IDoubleArray:
 		elems := arr.Elements()
 		return unsafe.Slice((*byte)(unsafe.Pointer(unsafe.SliceData(elems))), len(elems)*8)
 	}
@@ -1465,28 +1465,28 @@ func (env *jniEnv) GetPrimitiveArrayCritical(array java.JArray) []byte {
 func (env *jniEnv) ReleasePrimitiveArrayCritical(array java.JArray, raw []byte, mode java.JInt) {
 	if mode == 0 || mode == java.JNI_COMMIT {
 		switch arr := env.getArray(array).(type) {
-		case java.IGenericArray[java.JBoolean]:
+		case java.IBooleanArray:
 			elems := arr.Elements()
 			copy(unsafe.Slice((*byte)(unsafe.Pointer(unsafe.SliceData(elems))), len(elems)), raw)
-		case java.IGenericArray[java.JByte]:
+		case java.IByteArray:
 			elems := arr.Elements()
 			copy(unsafe.Slice((*byte)(unsafe.Pointer(unsafe.SliceData(elems))), len(elems)), raw)
-		case java.IGenericArray[java.JChar]:
+		case java.ICharArray:
 			elems := arr.Elements()
 			copy(unsafe.Slice((*byte)(unsafe.Pointer(unsafe.SliceData(elems))), len(elems)*2), raw)
-		case java.IGenericArray[java.JShort]:
+		case java.IShortArray:
 			elems := arr.Elements()
 			copy(unsafe.Slice((*byte)(unsafe.Pointer(unsafe.SliceData(elems))), len(elems)*2), raw)
-		case java.IGenericArray[java.JInt]:
+		case java.IIntArray:
 			elems := arr.Elements()
 			copy(unsafe.Slice((*byte)(unsafe.Pointer(unsafe.SliceData(elems))), len(elems)*4), raw)
-		case java.IGenericArray[java.JLong]:
+		case java.ILongArray:
 			elems := arr.Elements()
 			copy(unsafe.Slice((*byte)(unsafe.Pointer(unsafe.SliceData(elems))), len(elems)*8), raw)
-		case java.IGenericArray[java.JFloat]:
+		case java.IFloatArray:
 			elems := arr.Elements()
 			copy(unsafe.Slice((*byte)(unsafe.Pointer(unsafe.SliceData(elems))), len(elems)*4), raw)
-		case java.IGenericArray[java.JDouble]:
+		case java.IDoubleArray:
 			elems := arr.Elements()
 			copy(unsafe.Slice((*byte)(unsafe.Pointer(unsafe.SliceData(elems))), len(elems)*8), raw)
 		}
@@ -1535,7 +1535,7 @@ func (env *jniEnv) GetObjectRefType(obj java.JObject) java.JObjectRefType {
 }
 
 func (env *jniEnv) ObjectRef(obj java.IObject) gava.Ref {
-	if getPtr(obj) == nil {
+	if isNil(obj) {
 		return nilRef
 	}
 	ref := gava.Ref(obj.HashCode()<<2|java.JInt(java.JNILocalRefType)) & 0xFFFFFFFF
@@ -1591,7 +1591,7 @@ func (env *jniEnv) getField(ref java.JFieldID) java.IField {
 }
 
 func (env *jniEnv) methodRef(method java.IMethod) gava.Ref {
-	if getPtr(method) == nil {
+	if isNil(method) {
 		return nilRef
 	}
 	ref := gava.Ref(method.HashCode()<<1) & 0xFFFFFFFF
@@ -1600,7 +1600,7 @@ func (env *jniEnv) methodRef(method java.IMethod) gava.Ref {
 }
 
 func (env *jniEnv) fieldRef(field java.IField) gava.Ref {
-	if getPtr(field) == nil {
+	if isNil(field) {
 		return nilRef
 	}
 	ref := gava.Ref(field.HashCode()<<1) & 0xFFFFFFFF
@@ -1697,6 +1697,7 @@ func (env *jniEnv) extractPtr(method java.IMethod, args java.TypePtr[java.JValue
 	return arr, nil
 }
 
-func getPtr(v any) unsafe.Pointer {
-	return (*struct{ _, data unsafe.Pointer })(unsafe.Pointer(&v)).data
+func isNil(v any) bool {
+	p := (*struct{ rtype, data unsafe.Pointer })(unsafe.Pointer(&v))
+	return p.rtype == nil || p.data == nil
 }

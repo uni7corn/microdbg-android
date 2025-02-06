@@ -29,7 +29,7 @@ func NewClassFactory(f func(ClassFactory, string) FakeClass) ClassFactory {
 }
 
 func (cf *classFactory) WrapClass(cls java.IClass) FakeClass {
-	if getPtr(cls) == nil {
+	if isNil(cls) {
 		return nil
 	} else if fake, ok := cls.(FakeClass); ok {
 		return fake
@@ -197,6 +197,7 @@ func arrayOf(cf ClassFactory, elem java.IClass) *fakeArrayClass {
 	}
 }
 
-func getPtr(v any) unsafe.Pointer {
-	return (*struct{ _, data unsafe.Pointer })(unsafe.Pointer(&v)).data
+func isNil(v any) bool {
+	p := (*struct{ rtype, data unsafe.Pointer })(unsafe.Pointer(&v))
+	return p.rtype == nil || p.data == nil
 }

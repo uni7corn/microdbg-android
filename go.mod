@@ -6,7 +6,7 @@ require (
 	github.com/Xuanwo/go-locale v1.1.2
 	github.com/google/uuid v1.6.0
 	github.com/wnxd/microdbg v0.0.0-20250125163537-004a62dd30f9
-	github.com/wnxd/microdbg-java v0.0.0-20250117155956-50a86a844522
+	github.com/wnxd/microdbg-java v0.0.0-20250206041613-753119c42393
 	github.com/wnxd/microdbg-linux v0.0.0-20250125163704-40fa69dae17d
 	github.com/wnxd/microdbg-loader v0.0.0-20250125085505-ff5705dfc5e6
 	go.mozilla.org/pkcs7 v0.9.0

@@ -56,7 +56,7 @@ func init() {
 	definePrimitiveMethod(FakeSetClass, "toArray", "(Ljava/lang/Object;)[Ljava/lang/Object;", Modifier_PUBLIC|Modifier_ABSTRACT).BindCall(func(obj java.IObject, args ...any) any {
 		fake := obj.(FakeObject)
 		set := fake.Value().(map[java.IObject]struct{})
-		a := args[0].(java.IGenericArray[java.IObject])
+		a := args[0].(java.IObjectArray)
 		arr := a.Elements()
 		i := 0
 		for v := range set {

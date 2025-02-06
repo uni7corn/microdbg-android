@@ -25,6 +25,8 @@ type FakeClass interface {
 	GetField(name, sig string) FakeField
 	GetStaticField(name, sig string) FakeField
 	DefineField(name, sig string, mod Modifier) FakeField
+
+	findMethod(java.JInt) FakeMethod
 }
 
 type wrapClass struct {
@@ -137,7 +139,7 @@ func (cls *fakeClass) DescriptorString() java.IString {
 func (cls *fakeClass) GetSuperclass() java.IClass {
 	if cls.super != nil {
 		return cls.super
-	} else if cls.IsInterface() {
+	} else if cls.IsInterface() || cls.name == "java.lang.Object" {
 		return nil
 	}
 	return FakeObjectClass
@@ -237,13 +239,7 @@ func (cls *fakeClass) NewArray(length int) java.IArray {
 
 func (cls *fakeClass) FindMethod(name, sig string) FakeMethod {
 	h := HashCode(name) ^ HashCode(sig)
-	if method, ok := cls.methods.Load(h); ok {
-		return method.(FakeMethod)
-	}
-	if super, ok := cls.super.(FakeClass); ok {
-		return super.FindMethod(name, sig)
-	}
-	return nil
+	return cls.findMethod(h)
 }
 
 func (cls *fakeClass) GetMethod(name, sig string) FakeMethod {
@@ -283,7 +279,7 @@ func (cls *fakeClass) FindField(name, sig string) FakeField {
 	if field, ok := cls.fields.Load(h); ok {
 		return field.(FakeField)
 	}
-	if super, ok := cls.super.(FakeClass); ok {
+	if super, ok := cls.GetSuperclass().(FakeClass); ok {
 		return super.FindField(name, sig)
 	}
 	return nil
@@ -311,6 +307,23 @@ func (cls *fakeClass) DefineField(name, sig string, mod Modifier) FakeField {
 	field := cls.cf.DefineField(cls, name, sig, mod)
 	cls.fields.Store(h, field)
 	return field
+}
+
+func (cls *fakeClass) findMethod(h java.JInt) FakeMethod {
+	if method, ok := cls.methods.Load(h); ok {
+		return method.(FakeMethod)
+	}
+	if super, ok := cls.GetSuperclass().(FakeClass); !ok {
+	} else if method := super.findMethod(h); method != nil {
+		return method
+	}
+	for _, iface := range cls.GetInterfaces() {
+		if iface, ok := iface.(FakeClass); !ok {
+		} else if method := iface.findMethod(h); method != nil {
+			return method
+		}
+	}
+	return nil
 }
 
 func (cls *fakeArrayClass) GetSimpleName() java.IString {
