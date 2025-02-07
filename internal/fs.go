@@ -11,6 +11,7 @@ import (
 )
 
 type HybridFS struct {
+	debugger.DefaultFileHandler
 	fs   filesystem.VirtualFS
 	Base interface {
 		io.Closer

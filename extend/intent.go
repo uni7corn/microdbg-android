@@ -22,11 +22,6 @@ type Intent interface {
 type DefaultIntent struct {
 }
 
-type intent struct {
-	action  string
-	handler Intent
-}
-
 func (DefaultIntent) GetData() *url.URL {
 	return nil
 }

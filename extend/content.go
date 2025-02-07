@@ -11,6 +11,11 @@ import (
 	java "github.com/wnxd/microdbg-java"
 )
 
+type intentInfo struct {
+	action  string
+	handler Intent
+}
+
 func (ex *extend) defineContent() {
 	pkg := ex.art.Package()
 	tag, _ := locale.Detect()
@@ -122,69 +127,69 @@ func (ex *extend) defineContent() {
 		return nil
 	})
 
-	Intent := ex.cf.DefineClass("android.content.Intent")
-	Intent.DefineMethod("getAction", "()Ljava/lang/String;", gava.Modifier_PUBLIC).BindCall(func(obj java.IObject, args ...any) any {
-		intent := obj.(gava.FakeObject).Value().(*intent)
+	ContentIntent := ex.cf.DefineClass("android.content.Intent")
+	ContentIntent.DefineMethod("getAction", "()Ljava/lang/String;", gava.Modifier_PUBLIC).BindCall(func(obj java.IObject, args ...any) any {
+		intent := obj.(gava.FakeObject).Value().(*intentInfo)
 		return gava.FakeString(intent.action)
 	})
-	Intent.DefineMethod("getData", "()Landroid/net/Uri;", gava.Modifier_PUBLIC).BindCall(func(obj java.IObject, args ...any) any {
-		intent := obj.(gava.FakeObject).Value().(*intent)
+	ContentIntent.DefineMethod("getData", "()Landroid/net/Uri;", gava.Modifier_PUBLIC).BindCall(func(obj java.IObject, args ...any) any {
+		intent := obj.(gava.FakeObject).Value().(*intentInfo)
 		data := intent.handler.GetData()
 		if data == nil {
 			return nil
 		}
 		return ex.cf.GetClass("android.net.Uri").NewObject(*data)
 	})
-	Intent.DefineMethod("getBooleanExtra", "(Ljava/lang/String;Z)Z", gava.Modifier_PUBLIC).BindCall(func(obj java.IObject, args ...any) any {
-		intent := obj.(gava.FakeObject).Value().(*intent)
+	ContentIntent.DefineMethod("getBooleanExtra", "(Ljava/lang/String;Z)Z", gava.Modifier_PUBLIC).BindCall(func(obj java.IObject, args ...any) any {
+		intent := obj.(gava.FakeObject).Value().(*intentInfo)
 		name := args[0].(java.IString).String()
 		defValue := args[1].(java.JBoolean)
 		return intent.handler.GetBooleanExtra(name, defValue)
 	})
-	Intent.DefineMethod("getByteExtra", "(Ljava/lang/String;B)B", gava.Modifier_PUBLIC).BindCall(func(obj java.IObject, args ...any) any {
-		intent := obj.(gava.FakeObject).Value().(*intent)
+	ContentIntent.DefineMethod("getByteExtra", "(Ljava/lang/String;B)B", gava.Modifier_PUBLIC).BindCall(func(obj java.IObject, args ...any) any {
+		intent := obj.(gava.FakeObject).Value().(*intentInfo)
 		name := args[0].(java.IString).String()
 		defValue := args[1].(java.JByte)
 		return intent.handler.GetByteExtra(name, defValue)
 	})
-	Intent.DefineMethod("getCharExtra", "(Ljava/lang/String;C)C", gava.Modifier_PUBLIC).BindCall(func(obj java.IObject, args ...any) any {
-		intent := obj.(gava.FakeObject).Value().(*intent)
+	ContentIntent.DefineMethod("getCharExtra", "(Ljava/lang/String;C)C", gava.Modifier_PUBLIC).BindCall(func(obj java.IObject, args ...any) any {
+		intent := obj.(gava.FakeObject).Value().(*intentInfo)
 		name := args[0].(java.IString).String()
 		defValue := args[1].(java.JChar)
 		return intent.handler.GetCharExtra(name, defValue)
 	})
-	Intent.DefineMethod("getShortExtra", "(Ljava/lang/String;S)S", gava.Modifier_PUBLIC).BindCall(func(obj java.IObject, args ...any) any {
-		intent := obj.(gava.FakeObject).Value().(*intent)
+	ContentIntent.DefineMethod("getShortExtra", "(Ljava/lang/String;S)S", gava.Modifier_PUBLIC).BindCall(func(obj java.IObject, args ...any) any {
+		intent := obj.(gava.FakeObject).Value().(*intentInfo)
 		name := args[0].(java.IString).String()
 		defValue := args[1].(java.JShort)
 		return intent.handler.GetShortExtra(name, defValue)
 	})
-	Intent.DefineMethod("getIntExtra", "(Ljava/lang/String;I)I", gava.Modifier_PUBLIC).BindCall(func(obj java.IObject, args ...any) any {
-		intent := obj.(gava.FakeObject).Value().(*intent)
+	ContentIntent.DefineMethod("getIntExtra", "(Ljava/lang/String;I)I", gava.Modifier_PUBLIC).BindCall(func(obj java.IObject, args ...any) any {
+		intent := obj.(gava.FakeObject).Value().(*intentInfo)
 		name := args[0].(java.IString).String()
 		defValue := args[1].(java.JInt)
 		return intent.handler.GetIntExtra(name, defValue)
 	})
-	Intent.DefineMethod("getLongExtra", "(Ljava/lang/String;J)J", gava.Modifier_PUBLIC).BindCall(func(obj java.IObject, args ...any) any {
-		intent := obj.(gava.FakeObject).Value().(*intent)
+	ContentIntent.DefineMethod("getLongExtra", "(Ljava/lang/String;J)J", gava.Modifier_PUBLIC).BindCall(func(obj java.IObject, args ...any) any {
+		intent := obj.(gava.FakeObject).Value().(*intentInfo)
 		name := args[0].(java.IString).String()
 		defValue := args[1].(java.JLong)
 		return intent.handler.GetLongExtra(name, defValue)
 	})
-	Intent.DefineMethod("getFloatExtra", "(Ljava/lang/String;F)F", gava.Modifier_PUBLIC).BindCall(func(obj java.IObject, args ...any) any {
-		intent := obj.(gava.FakeObject).Value().(*intent)
+	ContentIntent.DefineMethod("getFloatExtra", "(Ljava/lang/String;F)F", gava.Modifier_PUBLIC).BindCall(func(obj java.IObject, args ...any) any {
+		intent := obj.(gava.FakeObject).Value().(*intentInfo)
 		name := args[0].(java.IString).String()
 		defValue := args[1].(java.JFloat)
 		return intent.handler.GetFloatExtra(name, defValue)
 	})
-	Intent.DefineMethod("getDoubleExtra", "(Ljava/lang/String;D)D", gava.Modifier_PUBLIC).BindCall(func(obj java.IObject, args ...any) any {
-		intent := obj.(gava.FakeObject).Value().(*intent)
+	ContentIntent.DefineMethod("getDoubleExtra", "(Ljava/lang/String;D)D", gava.Modifier_PUBLIC).BindCall(func(obj java.IObject, args ...any) any {
+		intent := obj.(gava.FakeObject).Value().(*intentInfo)
 		name := args[0].(java.IString).String()
 		defValue := args[1].(java.JDouble)
 		return intent.handler.GetDoubleExtra(name, defValue)
 	})
-	Intent.DefineMethod("getStringExtra", "(Ljava/lang/String;)Ljava/lang/String;", gava.Modifier_PUBLIC).BindCall(func(obj java.IObject, args ...any) any {
-		intent := obj.(gava.FakeObject).Value().(*intent)
+	ContentIntent.DefineMethod("getStringExtra", "(Ljava/lang/String;)Ljava/lang/String;", gava.Modifier_PUBLIC).BindCall(func(obj java.IObject, args ...any) any {
+		intent := obj.(gava.FakeObject).Value().(*intentInfo)
 		name := args[0].(java.IString).String()
 		return intent.handler.GetStringExtra(name)
 	})
@@ -198,6 +203,16 @@ func (ex *extend) defineContent() {
 	Configuration := ex.cf.DefineClass("android.content.res.Configuration")
 	Configuration.DefineField("locale", "Ljava/util/Locale;", gava.Modifier_PUBLIC).BindGet(func(obj java.IObject) any {
 		return ex.cf.GetClass("java.util.Locale").NewObject(tag)
+	})
+	Configuration.DefineField("screenLayout", "I", gava.Modifier_PUBLIC).BindGet(func(obj java.IObject) any {
+		const (
+			SCREENLAYOUT_SIZE_NORMAL   = 0x00000002
+			SCREENLAYOUT_LONG_YES      = 0x00000020
+			SCREENLAYOUT_LAYOUTDIR_LTR = 0x00000040
+			SCREENLAYOUT_ROUND_NO      = 0x00000100
+		)
+
+		return java.JInt(SCREENLAYOUT_SIZE_NORMAL | SCREENLAYOUT_LONG_YES | SCREENLAYOUT_LAYOUTDIR_LTR | SCREENLAYOUT_ROUND_NO)
 	})
 
 	Resources := ex.cf.DefineClass("android.content.res.Resources")
@@ -299,7 +314,10 @@ func (ex *extend) defineContent() {
 	Context.DefineMethod("registerReceiver", "(Landroid/content/BroadcastReceiver;Landroid/content/IntentFilter;)Landroid/content/Intent;", gava.Modifier_PUBLIC|gava.Modifier_ABSTRACT).BindCall(func(obj java.IObject, args ...any) any {
 		action := args[1].(gava.FakeObject).Value().(string)
 		if intent, ok := ex.intent.Load(action); ok {
-			return Intent.NewObject(intent)
+			return ContentIntent.NewObject(&intentInfo{
+				action:  action,
+				handler: intent.(Intent),
+			})
 		} else if ex.debug {
 			log.Printf("[%s] Intent undefined\n", action)
 		}
@@ -307,6 +325,18 @@ func (ex *extend) defineContent() {
 	})
 	Context.DefineMethod("unregisterReceiver", "(Landroid/content/BroadcastReceiver;)V", gava.Modifier_PUBLIC|gava.Modifier_ABSTRACT).BindCall(func(obj java.IObject, args ...any) any {
 		return nil
+	})
+	Context.DefineMethod("checkCallingOrSelfPermission", "(Ljava/lang/String;)I", gava.Modifier_PUBLIC|gava.Modifier_ABSTRACT).BindCall(func(obj java.IObject, args ...any) any {
+		const (
+			PERMISSION_GRANTED = 0
+			PERMISSION_DENIED  = -1
+		)
+
+		if ex.debug {
+			permission := args[0].(java.IString).String()
+			log.Printf("[%s] Denied permission\n", permission)
+		}
+		return java.JInt(PERMISSION_DENIED)
 	})
 
 	ContextWrapper := ex.cf.DefineClass("android.content.ContextWrapper", Context)
